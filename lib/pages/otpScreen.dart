@@ -27,7 +27,7 @@ class _OTPScreenState extends State<OTPScreen> {
     print(otp.text);
     print(widget.predata);
     // var url = Uri.parse('http://192.168.218.11:5000/api/auth/otp/verify');
-    var url = Uri.parse('http://172.17.28.192:5000/api/auth/otp/verify');
+    var url = Uri.parse('http://192.168.0.103:5000/api/auth/otp/verify');
     final headers = {'Content-Type': 'application/json; charset=UTF-8'};
     var data = {"adhaarNumber": widget.predata, "otp": otp.text};
     print(data);
@@ -39,13 +39,13 @@ class _OTPScreenState extends State<OTPScreen> {
           body: json.encode(data));
       print('this is res $res');
       if (res.statusCode == 200) {
+        print(res);
         final snackbar = SnackBar(content: Text('Verified Successfully!'));
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
         Navigator.push(
           context,
           MaterialPageRoute(
-            settings: RouteSettings(arguments: widget.predata),
-            builder: (context) => HomePage(),
+            builder: (context) => HomePage(aadharNumber: widget.predata),
           ),
         );
         return jsonDecode(res.body)['success'];
@@ -188,9 +188,11 @@ class _OTPScreenState extends State<OTPScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            settings: RouteSettings(arguments: widget.predata),
+                            // settings: RouteSettings(arguments: widget.predata),
                             builder: (context) {
-                              return HomePage();
+                              return HomePage(
+                                aadharNumber: widget.predata,
+                              );
                             },
                           ),
                         );

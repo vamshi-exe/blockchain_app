@@ -47,6 +47,7 @@ dependencies:
   qr_code_scanner: ^1.0.1
   shared_preferences: ^2.0.18
   snippet_coder_utils: ^1.0.12
+  glassmorphism: ^3.0.0
 
 dev_dependencies:
   flutter_lints: ^2.0.0

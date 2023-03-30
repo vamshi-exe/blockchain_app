@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,8 +20,16 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  final _prefs = SharedPreferences.getInstance();
+
   TextEditingController _adhaarNo = TextEditingController();
   FocusNode myFocusNode = new FocusNode();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
@@ -39,11 +48,14 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> Login(
     String adhaarNumber,
   ) async {
+    var prefs = await _prefs;
+    prefs.setString("aadhar_number", adhaarNumber);
     print(adhaarNumber);
     if (adhaarNumber == "") return;
 
     try {
-      var url = Uri.parse('http://192.168.218.11:5000/api/auth/login/');
+      //http://192.168.0.103:5000
+      var url = Uri.parse('http://192.168.0.103:5000/api/auth/login/');
       var res = await http.post(url,
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
@@ -66,17 +78,6 @@ class _LoginPageState extends State<LoginPage> {
       context,
       MaterialPageRoute(
         builder: (context) => OTPScreen(
-          predata: _adhaarNo.text,
-        ),
-      ),
-    );
-  }
-
-  void scan() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => QRViewExample(
           predata: _adhaarNo.text,
         ),
       ),
@@ -177,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
             child: GestureDetector(
               onTap: () {
                 _submitForm();
-                // navigate();
+                navigate();
                 Login(_adhaarNo.text);
                 // Navigator.pushNamed(context, '/otp');
               },

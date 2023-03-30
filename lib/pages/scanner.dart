@@ -8,12 +8,11 @@ import 'package:blockchain/utils/functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QRViewExample extends StatefulWidget {
-  String? predata;
   QRViewExample({
     super.key,
-    required String predata,
   });
   @override
   State<StatefulWidget> createState() => _QRViewExampleState();
@@ -24,57 +23,24 @@ class _QRViewExampleState extends State<QRViewExample> {
 
   QRViewController? controller;
 
+  late SharedPreferences prefs;
+  String? aadharNum;
+  final _prefs = SharedPreferences.getInstance();
+
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    print('this isssssss ${widget.predata}');
+    aadhar();
+    // print('this isssssss ${prefs.getString("aadhar_number")}');
   }
 
-  // Future<void> scanData() async {
-  //   //print(otp.text);
-  //   print(predata);
-  //   // var url = Uri.parse('http://192.168.218.11:5000/api/auth/otp/verify');
-  //   var url = Uri.parse('http://192.168.218.11:5000/api/verify-scan');
-  //   final headers = {'Content-Type': 'application/json; charset=UTF-8'};
-  //   var data = {
-  //     "adhaarNumber": predata,
-  //   };
-  //   print(data);
-  //   try {
-  //     var res = await http.post(url,
-  //         headers: <String, String>{
-  //           'Content-Type': 'application/json; charset=UTF-8',
-  //         },
-  //         body: json.encode(data));
-  //     print('this is res $res');
-  //     if (res.statusCode == 200) {
-  //       final snackbar = SnackBar(content: Text('Verified Successfully!'));
-  //       ScaffoldMessenger.of(context).showSnackBar(snackbar);
-  //       // Navigator.push(
-  //       //   context,
-  //       //   MaterialPageRoute(
-  //       //     settings: RouteSettings(arguments: widget.predata),
-  //       //     builder: (context) {
-  //       //       return HomePage(
-  //       //         predata: '',
-  //       //       );
-  //       //     },
-  //       //   ),
-  //       // );
-  //       return jsonDecode(res.body)['success'];
-  //     } else {
-  //       final snackbar =
-  //           SnackBar(content: Text('Verification failed! Try Again'));
-  //       ScaffoldMessenger.of(context).showSnackBar(snackbar);
-  //       Text('Error sending data.');
-  //       throw Exception('Failed to verify OTP');
-  //     }
-  //   } catch (err) {
-  //     print('error was :$err');
-  //   }
-  // }
+  Future<void> aadhar() async {
+    prefs = await _prefs;
+    aadharNum = prefs.getString("aadhar_number")!;
+    // print("The String is ${prefs.getString("aadhar_number")}");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +56,7 @@ class _QRViewExampleState extends State<QRViewExample> {
               children: <Widget>[
                 if (result != null)
                   Text(
-                    'Data: ${result!.code} ,predata ${predata} ',
+                    'Data: ${result!.code} ,${aadharNum}',
                   )
                 // Navigator.pushNamed(context, '/otp');
                 else
@@ -104,7 +70,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   Widget _buildQrView(BuildContext context) {
-    print('sdfghjkjhg${widget.predata}');
+    // print('${aadharNum}');
     var scanArea = (MediaQuery.of(context).size.width < 400 ||
             MediaQuery.of(context).size.height < 400)
         ? 200.0
@@ -132,52 +98,51 @@ class _QRViewExampleState extends State<QRViewExample> {
         result = scanData;
       });
       print(scanData.code);
-      print(' this is adhaar number${widget.predata}');
-      // Future<void> scanningFun() async {
-      //   //print(otp.text);
-      //   print(predata);
-      //   // var url = Uri.parse('http://192.168.218.11:5000/api/auth/otp/verify');
-      //   var url = Uri.parse('http://192.168.218.11:5000/api/verify-scan');
-      //   final headers = {'Content-Type': 'application/json; charset=UTF-8'};
-      //   var data = {
-      //     "adhaarNumber": predata,
-      //   };
-      //   print(data);
-      //   try {
-      //     var res = await http.post(url,
-      //         headers: <String, String>{
-      //           'Content-Type': 'application/json; charset=UTF-8',
-      //         },
-      //         body: json.encode(data));
-      //     print('this is res $res');
-      //     if (res.statusCode == 200) {
-      //       final snackbar = SnackBar(content: Text('Verified Successfully!'));
-      //       ScaffoldMessenger.of(context).showSnackBar(snackbar);
-      //       // Navigator.push(
-      //       //   context,
-      //       //   MaterialPageRoute(
-      //       //     settings: RouteSettings(arguments: widget.predata),
-      //       //     builder: (context) {
-      //       //       return HomePage(
-      //       //         predata: '',
-      //       //       );
-      //       //     },
-      //       //   ),
-      //       // );
-      //       return jsonDecode(res.body)['success'];
-      //     } else {
-      //       final snackbar =
-      //           SnackBar(content: Text('Verification failed! Try Again'));
-      //       ScaffoldMessenger.of(context).showSnackBar(snackbar);
-      //       Text('Error sending data.');
-      //       throw Exception('Failed to verify OTP');
-      //     }
-      //   } catch (err) {
-      //     print('error was :$err');
-      //   }
-      // }
 
-      //Navigator.pushNamed(context, '/home');
+      /// function for sending scanned data
+      Future<void> scanningFun() async {
+        //print(otp.text);
+
+        // var url = Uri.parse('http://192.168.218.11:5000/api/auth/otp/verify');
+        var url = Uri.parse('http://192.168.0.103:5000/api/verify-scan');
+        var data = {"adhaarNumber": aadharNum, "code": scanData.code};
+        print('this adhaar is from function $aadharNum');
+        try {
+          var res = await http.post(url,
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8',
+              },
+              body: json.encode(data));
+          if (res.statusCode == 200) {
+            final snackbar = SnackBar(content: Text('Verified Successfully!'));
+            ScaffoldMessenger.of(context).showSnackBar(snackbar);
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     settings: RouteSettings(arguments: widget.predata),
+            //     builder: (context) {
+            //       return HomePage(
+            //         predata: '',
+            //       );
+            //     },
+            //   ),
+            // );
+            return jsonDecode(res.body)['success'];
+          } else {
+            final snackbar =
+                SnackBar(content: Text('Verification failed! Try Again'));
+            ScaffoldMessenger.of(context).showSnackBar(snackbar);
+            Text('Error sending data.');
+            throw Exception('Failed to verify OTP');
+          }
+        } catch (err) {
+          print('error was :$err');
+        }
+      }
+
+      scanningFun();
+      controller.pauseCamera();
+      Navigator.pushNamed(context, '/home');
 
       // Navigator.push(
       //   context,
