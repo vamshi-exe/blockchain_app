@@ -7,6 +7,7 @@ import 'package:blockchain/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OTPScreen extends StatefulWidget {
   String predata;
@@ -21,7 +22,26 @@ class OTPScreen extends StatefulWidget {
 }
 
 class _OTPScreenState extends State<OTPScreen> {
+  String _response = "";
   TextEditingController otp = TextEditingController();
+
+  @override
+  void initState() {
+    aadhar();
+    print('initstate');
+    print(widget.predata);
+    super.initState();
+  }
+
+  late SharedPreferences prefs;
+  String? aadharNum;
+  final _prefs = SharedPreferences.getInstance();
+
+  Future<void> aadhar() async {
+    prefs = await _prefs;
+    aadharNum = prefs.getString("aadhar_number")!;
+    //print("The String is ${prefs.getString("aadhar_number")}");
+  }
 
   Future<void> verifyOTP(String enteredOtp) async {
     print(otp.text);
@@ -42,12 +62,7 @@ class _OTPScreenState extends State<OTPScreen> {
         print(res);
         final snackbar = SnackBar(content: Text('Verified Successfully!'));
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(aadharNumber: widget.predata),
-          ),
-        );
+        forwardNav();
         return jsonDecode(res.body)['success'];
       } else {
         final snackbar =
@@ -61,11 +76,64 @@ class _OTPScreenState extends State<OTPScreen> {
     }
   }
 
+  String? resobj;
+
+  Future<Map<String, dynamic>?> details(String resobj) async {
+    try {
+      var url = Uri.parse('http://192.168.0.103:5000/api/auth/user');
+      final headers = {'Content-Type': 'application/json; charset=UTF-8'};
+      var postdata = {
+        "adhaarNumber": aadharNum,
+      };
+      var res = await http.post(url,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: json.encode(postdata));
+      print('this is data $postdata');
+      print('this is res $res');
+      if (res.statusCode == 200) {
+        //print('this is response object ${json.decode(res.body)}');
+
+        //dynamic ud = json.decode(res.body.toString());
+
+        Map<String, dynamic> resobj = jsonDecode(res.body)['user'];
+        print('user ======> $resobj');
+        setState(() {
+          _response = resobj.toString();
+        });
+        // print('tis is from setstate ${_responseText.toString()}');
+        dynamic user = res.body;
+        print('${json.decode(user.body)}');
+        print('qwrtyuiop ${user.user}');
+
+        return resobj;
+      } else {
+        throw Exception('Failed to verify OTP');
+      }
+    } catch (err) {
+      print('error was :$err');
+    }
+    return null;
+  }
+
   void navigate() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-          builder: (context) => LoginPage(), maintainState: false),
+        builder: (context) => LoginPage(),
+      ),
+    );
+  }
+
+  void forwardNav() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(
+          recievedData: _response,
+        ),
+      ),
     );
   }
 
@@ -185,17 +253,17 @@ class _OTPScreenState extends State<OTPScreen> {
                       // ),
                       onTap: () {
                         verifyOTP(otp.text);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            // settings: RouteSettings(arguments: widget.predata),
-                            builder: (context) {
-                              return HomePage(
-                                aadharNumber: widget.predata,
-                              );
-                            },
-                          ),
-                        );
+                        details(aadharNum.toString());
+                        // forwardNav();
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     // settings: RouteSettings(arguments: widget.predata),
+                        //     builder: (context) {
+                        //       return HomePage();
+                        //     },
+                        //   ),
+                        // );
                         // verifyOTP(otp.text);
                         // Navigator.of(context).pushReplacement(
                         //   MaterialPageRoute(
@@ -218,6 +286,11 @@ class _OTPScreenState extends State<OTPScreen> {
                           )),
                     ),
                   ),
+                  // Text(
+                  //   _response.toString(),
+                  //   style:
+                  //       GoogleFonts.poppins(color: Colors.black, fontSize: 21),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: Row(

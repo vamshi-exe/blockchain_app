@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:blockchain/controllers/helper.dart';
+import 'package:blockchain/model/userModel.dart';
+import 'package:blockchain/pages/details.dart';
 import 'package:blockchain/pages/scanner.dart';
+import 'package:flutter/gestures.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:http/http.dart' as http;
@@ -8,51 +12,209 @@ import 'package:blockchain/pages/login.dart';
 import 'package:blockchain/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({
-    super.key,
-    required this.aadharNumber,
-  });
+  String? recievedData;
+  final String? aadharNumber,
+      firstname,
+      middlename,
+      lastname,
+      dob,
+      address_1,
+      address_2,
+      contactNo,
+      pincode,
+      state,
+      user_image,
+      isVerified;
 
-  final String aadharNumber;
+  HomePage(
+      {super.key,
+      this.aadharNumber,
+      this.firstname,
+      this.middlename,
+      this.lastname,
+      this.dob,
+      this.address_1,
+      this.address_2,
+      this.contactNo,
+      this.pincode,
+      this.state,
+      this.user_image,
+      this.isVerified,
+      this.recievedData});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  // Future<void> scanning() async {
-  //   print('this is ${widget.predata}');
-  //   var url = Uri.parse('http://192.168.218.11:5000/api/verify-scan');
-  //   final headers = {'Content-Type': 'application/json; charset=UTF-8'};
-  //   var data = {
-  //     "adhaarNumber": widget.predata,
-  //   };
+  String _response = "";
+  String _response_Fname = "";
+  String _response_Mname = "";
+  String _response_Lname = "";
+  String _response_add_1 = "";
+  String _response_add_2 = "";
+  String _response_user_image = "";
+  String _response_contact_no = "";
+  String _response_state = "";
+  String _response_DOB = "";
+  String _response_verified = "";
+  String _response_pincode = "";
+  DateTime? _selectedDate;
+  int? _age;
 
-  //   print(data);
-  //   try {
-  //     var res = await http.post(url,
-  //         headers: <String, String>{
-  //           'Content-Type': 'application/json; charset=UTF-8',
-  //         },
-  //         body: json.encode(data));
-  //     print('this is res $res');
-  //     if (res.statusCode == 200) {
-  //       final snackbar = SnackBar(content: Text('scanned Successfully!'));
-  //       ScaffoldMessenger.of(context).showSnackBar(snackbar);
+  //List<UserModel> user = <UserModel>[];
+  List fields = <dynamic>[];
+  late SharedPreferences prefs;
+  String? aadharNum;
+  final _prefs = SharedPreferences.getInstance();
 
-  //       return jsonDecode(res.body)['success'];
-  //     } else {
-  //       final snackbar = SnackBar(content: Text('scanning failed! Try Again'));
-  //       ScaffoldMessenger.of(context).showSnackBar(snackbar);
-  //       Text('Error sending data.');
-  //       throw Exception('Failed to verify OTP');
-  //     }
-  //   } catch (err) {
-  //     print('error was :$err');
-  //   }
+  //bool _isLoading = false;
+  @override
+  void initState() {
+    aadhar();
+    details();
+    // dynamic response = details(aadharNum.toString());
+    super.initState();
+
+    // getDetails();
+  }
+
+  // getDetails() async {
+  //   User newUser = User();
+  //   await newUser.getUserDetails();
+  //   fields = newUser.data;
+  //   setState(() {
+  //     _isLoading = false;
+  //   });
   // }
+
+  Future<void> aadhar() async {
+    prefs = await _prefs;
+    aadharNum = prefs.getString("aadhar_number")!;
+    //print("The String is ${prefs.getString("aadhar_number")}");
+  }
+
+  /// posting adhaarNO to fetch data present in api
+  ///
+  Future<Map<String, dynamic>?> details() async {
+    try {
+      var url = Uri.parse('http://192.168.0.103:5000/api/auth/user');
+      final headers = {'Content-Type': 'application/json; charset=UTF-8'};
+      var postdata = {
+        "adhaarNumber": aadharNum,
+      };
+      var res = await http.post(url,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: json.encode(postdata));
+      print('this is data $postdata');
+      print('this is res $res');
+      if (res.statusCode == 200) {
+        //print('this is response object ${json.decode(res.body)}');
+
+        //dynamic ud = json.decode(res.body.toString());
+
+        Map<String, dynamic> resobj = jsonDecode(res.body)['user'];
+        var fname = jsonDecode(res.body)['user']['firstname'];
+        var mname = jsonDecode(res.body)['user']['middlename'];
+        var lname = jsonDecode(res.body)['user']['lastname'];
+        var dob = jsonDecode(res.body)['user']['dob'];
+        var add1 = jsonDecode(res.body)['user']['address_1'];
+        var add2 = jsonDecode(res.body)['user']['address_2'];
+        var contact = jsonDecode(res.body)['user']['contactNo'];
+        var state = jsonDecode(res.body)['user']['state'];
+        var verified = jsonDecode(res.body)['user']['isVerified'];
+        var pincode = jsonDecode(res.body)['user']['pincode'];
+        var userimage = jsonDecode(res.body)['user']['user_image'];
+        var adhaarimage = jsonDecode(res.body)['user']['adhaar_image'];
+
+        print('user ======> $resobj');
+        print('user ======> $fname');
+        print('user ======> $mname');
+        print('user ======> $lname');
+        print('user ======> $dob');
+        print('user ======> $add1');
+        print('user ======> $add2');
+        print('user ======> ${verified.toString()}');
+        print('user ======> $userimage');
+        print('user ======> $adhaarimage');
+        print('user ======> $pincode');
+
+        // print('user ======> ${jsonDecode(res.body)['user']['firstname']}');
+        // print('user ======> ${jsonDecode(res.body)['user']['middlename']}');
+        // print('user ======> ${jsonDecode(res.body)['user']['lastname']}');
+        // print('user ======> ${jsonDecode(res.body)['user']['dob']}');
+        // print('user ======> ${jsonDecode(res.body)['user']['address_1']}');
+        // print('user ======> ${jsonDecode(res.body)['user']['address_2']}');
+        setState(() {
+          _response = resobj.toString();
+        });
+        setState(() {
+          _response_Fname = fname;
+        });
+        setState(() {
+          _response_Mname = mname;
+        });
+        setState(() {
+          _response_Lname = lname;
+        });
+        setState(() {
+          _response_contact_no = contact;
+        });
+        setState(() {
+          _response_DOB = dob;
+        });
+        setState(() {
+          _response_state = state;
+        });
+        setState(() {
+          _response_add_1 = add1;
+        });
+        setState(() {
+          _response_add_2 = add2;
+        });
+        setState(() {
+          _response_verified = verified.toString();
+        });
+        setState(() {
+          _response_pincode = pincode;
+        });
+        setState(() {
+          _response_user_image = userimage;
+        });
+
+        //
+        //print('tis is from setstate ${_responseText.toString()}');
+        dynamic user = res.body;
+        print('${json.decode(user.body)}');
+        print('qwrtyuiop ${user.user}');
+
+        return resobj;
+      } else {
+        throw Exception('Failed to verify OTP');
+      }
+    } catch (err) {
+      print('error was :$err');
+    }
+    return null;
+  }
+
+  var _responseText;
+
+  Future makeRequest() async {
+    var getUrl = Uri.parse('http://192.168.0.103:5000/api/auth/user');
+    var getResponse = await http.get(getUrl);
+    setState(() {
+      _responseText = getResponse.body;
+    });
+  }
+
+  ///req data from api///
+//how to fetch data from api in flutter?
 
   @override
   Widget build(BuildContext context) {
@@ -61,96 +223,8 @@ class _HomePageState extends State<HomePage> {
         onWillPop: () async => false,
         child: Scaffold(
           extendBodyBehindAppBar: true,
-
-          // body: Padding(
-          //   padding: const EdgeInsets.only(top: 20),
-          //   child: Column(
-          //     mainAxisAlignment: MainAxisAlignment.start,
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Text(predata.toString()),
-          //       Padding(
-          //         padding: const EdgeInsets.only(left: 10),
-          //         child: Text(
-          //           'Welcome Ashish!',
-          //           style: GoogleFonts.poppins(fontSize: 24, color: blueColor),
-          //         ),
-          //       ),
-          //       Center(
-          //         child: Container(
-          //           height: 220,
-          //           width: MediaQuery.of(context).size.width * 0.98,
-          //           decoration: BoxDecoration(
-          //               color: blueColor,
-          //               borderRadius: BorderRadius.circular(20)),
-          //           child: Row(
-          //             children: [
-          //               Padding(
-          //                 padding: const EdgeInsets.all(8.0),
-          //                 child: CircleAvatar(
-          //                     radius: 64,
-          //                     backgroundImage: NetworkImage(
-          //                         'https://t3.ftcdn.net/jpg/03/46/83/96/240_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg')),
-          //               ),
-          //               Padding(
-          //                 padding: const EdgeInsets.only(top: 40),
-          //                 child: Column(
-          //                   mainAxisAlignment: MainAxisAlignment.start,
-          //                   crossAxisAlignment: CrossAxisAlignment.start,
-          //                   children: [
-          //                     //Text(),
-          //                     Text(
-          //                       'Name: Ashish Sinha',
-          //                       style: GoogleFonts.poppins(
-          //                           fontSize: 15, color: Colors.white),
-          //                     ),
-          //                     Text(
-          //                       'DOB: 21 NOV 2001',
-          //                       style: GoogleFonts.poppins(
-          //                           fontSize: 15, color: Colors.white),
-          //                     ),
-          //                     Text(
-          //                       'Sex: Male',
-          //                       style: GoogleFonts.poppins(
-          //                           fontSize: 15, color: Colors.white),
-          //                     ),
-          //                     Text(
-          //                       'Add: PHCET Rasayani',
-          //                       style: GoogleFonts.poppins(
-          //                           fontSize: 15, color: Colors.white),
-          //                     ),
-          //                     // SizedBox(
-          //                     //   height: 10,
-          //                     // ),
-          //                     Row(
-          //                       children: [
-          //                         Text(
-          //                           'Status: VERIFIED !',
-          //                           style: GoogleFonts.poppins(
-          //                               fontSize: 15, color: Colors.white),
-          //                         ),
-          //                         SizedBox(
-          //                           width: 10,
-          //                         ),
-          //                         Image.asset(
-          // 'assets/images/green_tick.png',
-          // height: 45,
-          // width: 45,
-          //                         )
-          //                       ],
-          //                     )
-          //                   ],
-          //                 ),
-          //               )
-          //             ],
-          //           ),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
           body: SingleChildScrollView(
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             //  scrollDirection: Axis.vertical,
             child: Column(
               children: [
@@ -160,7 +234,7 @@ class _HomePageState extends State<HomePage> {
                       'assets/images/bg_image.jpg',
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 8, top: 10),
+                      padding: const EdgeInsets.only(left: 8, top: 10),
                       child: GlassmorphicContainer(
                         width: 40,
                         height: 40,
@@ -169,8 +243,8 @@ class _HomePageState extends State<HomePage> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              Color(0xFFffffff).withAlpha(0),
-                              Color(0xFFffffff).withAlpha(0),
+                              const Color(0xFFffffff).withAlpha(0),
+                              const Color(0xFFffffff).withAlpha(0),
                             ],
                             stops: [
                               0.3,
@@ -182,9 +256,9 @@ class _HomePageState extends State<HomePage> {
                             begin: Alignment.bottomRight,
                             end: Alignment.topLeft,
                             colors: [
-                              Color(0xFF4579C5).withAlpha(100),
-                              Color(0xFFFFFFF).withAlpha(55),
-                              Color(0xFFF75035).withAlpha(10),
+                              const Color(0xFF4579C5).withAlpha(100),
+                              const Color(0x0fffffff).withAlpha(55),
+                              const Color(0xFFF75035).withAlpha(10),
                             ],
                             stops: [
                               0.06,
@@ -201,7 +275,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               );
                             },
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.qr_code_scanner,
                               color: Colors.white,
                             ),
@@ -209,30 +283,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    // Padding(
-                    //   padding: const EdgeInsets.only(left: 8, top: 10),
-                    //   child: Container(
-                    //     height: 35,
-                    //     width: 35,
-                    //     decoration: BoxDecoration(
-                    //         color: Colors.white.withOpacity(0.25),
-                    //         borderRadius: BorderRadius.circular(5)),
-                    //     child: Center(
-                    //       child: IconButton(
-                    //         onPressed: () {
-                    //           Navigator.push(
-                    //               context,
-                    //               MaterialPageRoute(
-                    //                   builder: (context) => QRViewExample()));
-                    //         },
-                    //         icon: Icon(
-                    //           Icons.qr_code_scanner,
-                    //           color: Colors.white,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
                     Padding(
                       padding: const EdgeInsets.only(top: 170),
                       child: Center(
@@ -240,7 +290,7 @@ class _HomePageState extends State<HomePage> {
                           //color: Colors.white,
                           height: MediaQuery.of(context).size.height,
                           //width: 100,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(35),
@@ -255,10 +305,10 @@ class _HomePageState extends State<HomePage> {
                         child: Stack(
                           children: [
                             CircleAvatar(
-                              radius: 64,
-                              backgroundImage: NetworkImage(
-                                  'https://t3.ftcdn.net/jpg/03/46/83/96/240_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg'),
-                            ),
+                                radius: 64,
+                                backgroundImage:
+                                    // NetworkImage('$_response_user_image'),
+                                    Image.network(_response_user_image).image),
                             Positioned(
                               top: 80,
                               left: 75,
@@ -275,268 +325,169 @@ class _HomePageState extends State<HomePage> {
                     Positioned(
                       top: 250,
                       left: 105,
-                      child: Row(
+                      child: Column(
                         children: [
-                          Image.asset(
-                            'assets/images/location.png',
-                            height: 30,
-                            width: 30,
-                          ),
                           Text(
-                            'Maharashtra | 21',
-                            style: GoogleFonts.poppins(fontSize: 15),
+                            '${_response_verified}',
+                            style: GoogleFonts.poppins(
+                                fontSize: 18, color: Colors.green),
+                          ),
+                          Row(
+                            children: [
+                              Image.asset('assets/images/location.png',
+                                  width: 35, height: 35),
+                              Text(
+                                '$_response_state',
+                                style:
+                                    TextStyle(fontSize: 19, color: blueColor),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
                     Positioned(
-                      top: 300,
+                      top: 320,
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 15),
+                        padding: EdgeInsets.only(left: 15),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'First Name',
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w300),
-                                    ),
-                                    Container(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.07,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.4,
-                                      child: Center(
-                                        child: Text(
-                                          'Vamshi',
-                                          style:
-                                              GoogleFonts.poppins(fontSize: 20),
-                                        ),
-                                      ),
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey.withOpacity(0.12),
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  width: 40,
-                                ),
-                                ///// last name /////
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Last Name',
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w300),
-                                    ),
-                                    Container(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.07,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.4,
-                                      child: Center(
-                                        child: Text(
-                                          'Vadnala',
-                                          style:
-                                              GoogleFonts.poppins(fontSize: 20),
-                                        ),
-                                      ),
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey.withOpacity(0.12),
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            //////////////////////////////////
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Address',
+                                  'Name: ${_response_Fname + " " + _response_Lname} ',
                                   style: GoogleFonts.poppins(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w300),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: Container(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.07,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.9,
-                                    child: Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 5),
-                                        child: Text(
-                                          '312/202, Ch Ramaiah Bldg, Padmanagar, Bhiwandi',
-                                          overflow: TextOverflow.ellipsis,
-                                          softWrap: false,
-                                          style:
-                                              GoogleFonts.poppins(fontSize: 17),
-                                        ),
-                                      ),
-                                    ),
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey.withOpacity(0.12),
-                                        borderRadius:
-                                            BorderRadius.circular(15)),
-                                  ),
+                                      fontSize: 20, color: blueColor),
                                 ),
                               ],
                             ),
-                            SizedBox(
-                              height: 20,
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                'Middle Name: ${_response_Mname + " " + _response_Lname}  ',
+                                style: GoogleFonts.poppins(
+                                    fontSize: 20, color: blueColor),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                'Contact No: +91-$_response_contact_no ',
+                                style: GoogleFonts.poppins(
+                                    fontSize: 20, color: blueColor),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                'DOB: $_response_DOB',
+                                style: GoogleFonts.poppins(
+                                    fontSize: 20, color: blueColor),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                'Gender : Male ',
+                                style: GoogleFonts.poppins(
+                                    fontSize: 20, color: blueColor),
+                              ),
                             ),
                             Row(
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Contact Number',
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w300),
-                                    ),
-                                    Container(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.07,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.55,
-                                      child: Center(
-                                        child: Text(
-                                          '+91-7620237601',
-                                          style:
-                                              GoogleFonts.poppins(fontSize: 19),
-                                        ),
-                                      ),
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey.withOpacity(0.12),
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                    ),
-                                  ],
+                                Container(
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.159,
+                                  child: Text(
+                                    'Address: ',
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 20, color: blueColor),
+                                  ),
                                 ),
-                                SizedBox(
-                                  width: 20,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Sex',
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w300),
-                                    ),
-                                    Container(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.07,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.3,
-                                      child: Center(
-                                        child: Text(
-                                          'Male',
-                                          style:
-                                              GoogleFonts.poppins(fontSize: 20),
-                                        ),
-                                      ),
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey.withOpacity(0.12),
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                    ),
-                                  ],
-                                ),
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.7,
+                                  child: Text(
+                                    '${_response_add_1 + " " + "," + " " + _response_add_2}',
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 19, color: blueColor),
+                                  ),
+                                )
                               ],
                             ),
-                            ///////////////////////////////////////
-                            SizedBox(
-                              height: 40,
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                'Pincode:$_response_pincode ',
+                                style: GoogleFonts.poppins(
+                                    fontSize: 20, color: blueColor),
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: details,
+                              child: Text('data'),
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(left: 30),
+                              padding: const EdgeInsets.only(top: 20),
                               child: Container(
                                 height:
-                                    MediaQuery.of(context).size.height * 0.08,
-                                width: MediaQuery.of(context).size.width * 0.75,
+                                    MediaQuery.of(context).size.height * 0.07,
+                                width: MediaQuery.of(context).size.width * 0.9,
                                 decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(50),
-                                    color: blueColor),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Center(
-                                      child: Text(
-                                        'Logout ',
-                                        style: GoogleFonts.poppins(
-                                            fontSize: 24, color: Colors.white),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return SimpleDialog(
-                                                children: [
-                                                  SimpleDialogOption(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            20),
-                                                    child: const Text('Logout'),
-                                                    onPressed: () {
-                                                      Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
+                                    color: blueColor,
+                                    borderRadius: BorderRadius.circular(50)),
+                                child: IconButton(
+                                  onPressed: () {
+                                    //print('this is adhaar no $predata');
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return SimpleDialog(
+                                            //title: const Text('Scan!'),
+                                            children: [
+                                              SimpleDialogOption(
+                                                padding:
+                                                    const EdgeInsets.all(20),
+                                                child: const Text('Logout'),
+                                                onPressed: () {
+                                                  Navigator.pushReplacement(
+                                                      context,
+                                                      MaterialPageRoute(
                                                           builder: (context) =>
-                                                              const LoginPage(),
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                  SimpleDialogOption(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            20),
-                                                    child: const Text('Cancel'),
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                  )
-                                                ],
-                                              );
-                                            });
-                                      },
-                                      icon: Icon(
+                                                              const LoginPage()));
+                                                },
+                                              ),
+                                              SimpleDialogOption(
+                                                padding:
+                                                    const EdgeInsets.all(20),
+                                                child: const Text('Cancel'),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              )
+                                            ],
+                                          );
+                                        });
+                                  },
+                                  icon: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Logout',
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 21, color: Colors.white),
+                                      ),
+                                      SizedBox(
+                                        width: 15,
+                                      ),
+                                      Icon(
                                         Icons.logout,
                                         color: Colors.white,
                                       ),
-                                    )
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             )
@@ -549,46 +500,68 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+          //////////////////////////////////
+          // body: Column(
+          //   children: [
+          //     ElevatedButton(
+          //       onPressed: () {
+          //         details();
+          //       },
+          //       child: Text('send'),
+          //     ),
+          //     Text(widget.recievedData.toString()),
+          //     Text(
+          //       'this is name${_response_Fname}',
+          //       style: TextStyle(color: Colors.black),
+          //     ),
+          //     SizedBox(
+          //       height: 20,
+          //     ),
+          //     Text(_response)
+          //     // Text(
+          //     //   _response,
+          //     //   style: GoogleFonts.poppins(color: Colors.black, fontSize: 21),
+          //     // ),
+          //     //Text(_responseText!)
+          //   ],
+          // )
+          //ApiCall(response: response),
         ),
       ),
     );
   }
 }
 
-    // IconButton(
-    //                           onPressed: () {
-    //                             //print('this is adhaar no $predata');
-    //                             showDialog(
-    //                                 context: context,
-    //                                 builder: (context) {
-    //                                   return SimpleDialog(
-    //                                     //title: const Text('Scan!'),
-    //                                     children: [
-    //                                       SimpleDialogOption(
-    //                                         padding: const EdgeInsets.all(20),
-    //                                         child: const Text('Logout'),
-    //                                         onPressed: () {
-    //                                           Navigator.pushReplacement(
-    //                                               context,
-    //                                               MaterialPageRoute(
-    //                                                   builder: (context) =>
-    //                                                       const LoginPage()));
-    //                                         },
-    //                                       ),
-    //                                       SimpleDialogOption(
-    //                                         padding: const EdgeInsets.all(20),
-    //                                         child: const Text('Cancel'),
-    //                                         onPressed: () {
-    //                                           Navigator.of(context).pop();
-    //                                         },
-    //                                       )
-    //                                     ],
-    //                                   );
-    //                                 });
-    //                           },
-    //                           icon: Icon(
-    //                             Icons.more_vert_outlined,
-    //                             color: Colors.white,
-    //                           ),
-    //                         )
-                          
+class ApiCall extends StatelessWidget {
+  const ApiCall({
+    super.key,
+    required this.response,
+  });
+
+  final response;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: response,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          return ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+            return Card(
+              child: Column(children: [
+                ListTile(
+                  title: Text(snapshot.data[index]['firstname']),
+                )
+              ]),
+            );
+          });
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
+    );
+  }
+}

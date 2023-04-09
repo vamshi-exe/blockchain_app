@@ -25,9 +25,7 @@ class MyApp extends StatelessWidget {
       //home: LoginPage(),
       routes: {
         '/': (context) => const LoginPage(),
-        '/home': (context) => HomePage(
-              aadharNumber: '',
-            ),
+        '/home': (context) => HomePage(),
         '/details': (context) => const Details(),
         '/otp': (context) => OTPScreen(
               predata: '',

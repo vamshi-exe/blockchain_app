@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 // import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // final cloudinary = CloudinaryPublic('drcymcfus', 'my-uploads', cache: false);
 
@@ -99,3 +100,50 @@ Future ipAddress() async {
 
 // write a functon to post otp and then if the res.statusCode == 200 => redirect to home else show invalid otp
 
+/////////////////////////////////////
+late SharedPreferences prefs;
+String? aadharNum;
+final _prefs = SharedPreferences.getInstance();
+
+Future<void> aadhar() async {
+  prefs = await _prefs;
+  aadharNum = prefs.getString("aadhar_number")!;
+  //print("The String is ${prefs.getString("aadhar_number")}");
+}
+
+Future<void> details(String adhaarNumber) async {
+  var url = Uri.parse('http://192.168.0.103:5000/api/auth/user');
+  final headers = {'Content-Type': 'application/json; charset=UTF-8'};
+  var postdata = {
+    "adhaarNumber": aadharNum,
+  };
+
+  try {
+    var res = await http.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: json.encode(postdata));
+    print('this is data $postdata');
+    print('this is res $res');
+    if (res.statusCode == 200) {
+      //print('this is response object ${json.decode(res.body)}');
+
+      //dynamic ud = json.decode(res.body.toString());
+      var resobj = jsonDecode(res.body)['user'];
+      print('user ======> ${jsonDecode(res.body)['user']}');
+      dynamic user = res.body;
+      print('${json.decode(user.body)}');
+      // print('qwrtyuiop ${user.user}');
+      // setState(() {
+      //   _responseText = jsonDecode(res.body)[user];
+      // });
+
+      return resobj;
+    } else {
+      throw Exception('Failed to verify OTP');
+    }
+  } catch (err) {
+    print('error was :$err');
+  }
+}

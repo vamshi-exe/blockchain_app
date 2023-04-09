@@ -178,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
             child: GestureDetector(
               onTap: () {
                 _submitForm();
-                navigate();
+                // navigate();
                 Login(_adhaarNo.text);
                 // Navigator.pushNamed(context, '/otp');
               },

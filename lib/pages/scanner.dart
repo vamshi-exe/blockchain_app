@@ -30,6 +30,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   @override
   void initState() {
+    print('this one is from init state $aadharNum');
     // TODO: implement initState
     super.initState();
     aadhar();
@@ -104,7 +105,7 @@ class _QRViewExampleState extends State<QRViewExample> {
         //print(otp.text);
 
         // var url = Uri.parse('http://192.168.218.11:5000/api/auth/otp/verify');
-        var url = Uri.parse('http://192.168.0.103:5000/api/verify-scan');
+        var url = Uri.parse('http://192.168.214.11:5000/api/verify-scan');
         var data = {"adhaarNumber": aadharNum, "code": scanData.code};
         print('this adhaar is from function $aadharNum');
         try {
@@ -114,7 +115,7 @@ class _QRViewExampleState extends State<QRViewExample> {
               },
               body: json.encode(data));
           if (res.statusCode == 200) {
-            final snackbar = SnackBar(content: Text('Verified Successfully!'));
+            final snackbar = SnackBar(content: Text('Scanned Successfully!'));
             ScaffoldMessenger.of(context).showSnackBar(snackbar);
             // Navigator.push(
             //   context,
