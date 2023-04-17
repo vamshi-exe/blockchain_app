@@ -23,6 +23,19 @@ class OTPScreen extends StatefulWidget {
 
 class _OTPScreenState extends State<OTPScreen> {
   String _response = "";
+  String _response_Fname = "";
+  String _response_Mname = "";
+  String _response_Lname = "";
+  String _response_add_1 = "";
+  String _response_add_2 = "";
+  String _response_user_image = "";
+  String _response_contact_no = "";
+  String _response_state = "";
+  String _response_DOB = "";
+  String _response_verified = "";
+  String _response_pincode = "";
+  DateTime? _selectedDate;
+
   TextEditingController otp = TextEditingController();
 
   @override
@@ -98,7 +111,70 @@ class _OTPScreenState extends State<OTPScreen> {
         //dynamic ud = json.decode(res.body.toString());
 
         Map<String, dynamic> resobj = jsonDecode(res.body)['user'];
+        var fname = jsonDecode(res.body)['user']['firstname'];
+        var mname = jsonDecode(res.body)['user']['middlename'];
+        var lname = jsonDecode(res.body)['user']['lastname'];
+        var dob = jsonDecode(res.body)['user']['dob'];
+        var add1 = jsonDecode(res.body)['user']['address_1'];
+        var add2 = jsonDecode(res.body)['user']['address_2'];
+        var contact = jsonDecode(res.body)['user']['contactNo'];
+        var state = jsonDecode(res.body)['user']['state'];
+        var verified = jsonDecode(res.body)['user']['isVerified'];
+        var pincode = jsonDecode(res.body)['user']['pincode'];
+        var userimage = jsonDecode(res.body)['user']['user_image'];
+        var adhaarimage = jsonDecode(res.body)['user']['adhaar_image'];
+
         print('user ======> $resobj');
+        print('user ======> $fname');
+        print('user ======> $mname');
+        print('user ======> $lname');
+        print('user ======> $dob');
+        print('user ======> $add1');
+        print('user ======> $add2');
+        print('user ======> ${verified.toString()}');
+        print('user ======> $userimage');
+        print('user ======> $adhaarimage');
+        print('user ======> $pincode');
+        print('user ======> $state');
+        print('user ======> $contact');
+
+        setState(() {
+          _response = resobj.toString();
+        });
+        setState(() {
+          _response_Fname = fname;
+        });
+        setState(() {
+          _response_Mname = mname;
+        });
+        setState(() {
+          _response_Lname = lname;
+        });
+        setState(() {
+          _response_contact_no = contact;
+        });
+        setState(() {
+          _response_DOB = dob;
+        });
+        setState(() {
+          _response_state = state;
+        });
+        setState(() {
+          _response_add_1 = add1;
+        });
+        setState(() {
+          _response_add_2 = add2;
+        });
+        setState(() {
+          _response_verified = verified.toString();
+        });
+        setState(() {
+          _response_pincode = pincode;
+        });
+        setState(() {
+          _response_user_image = userimage;
+        });
+        // print('user ======> $resobj');
         setState(() {
           _response = resobj.toString();
         });
@@ -147,7 +223,7 @@ class _OTPScreenState extends State<OTPScreen> {
           color: Color.fromARGB(255, 23, 76, 119),
           fontWeight: FontWeight.w500),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color.fromRGBO(234, 239, 243, 1)),
+        border: Border.all(color: Color.fromARGB(255, 173, 181, 187)),
         borderRadius: BorderRadius.circular(8),
       ),
     );

@@ -74,10 +74,11 @@ class _HomePageState extends State<HomePage> {
   //bool _isLoading = false;
   @override
   void initState() {
-    aadhar();
-    details();
     // dynamic response = details(aadharNum.toString());
     super.initState();
+    print('hiii from init state');
+    aadhar();
+    details();
 
     // getDetails();
   }
@@ -284,7 +285,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(top: 170),
+                      padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height * 0.16),
                       child: Center(
                         child: Container(
                           //color: Colors.white,
@@ -301,7 +303,8 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Center(
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 110),
+                        padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height * 0.10),
                         child: Stack(
                           children: [
                             CircleAvatar(
@@ -310,8 +313,8 @@ class _HomePageState extends State<HomePage> {
                                     // NetworkImage('$_response_user_image'),
                                     Image.network(_response_user_image).image),
                             Positioned(
-                              top: 80,
-                              left: 75,
+                              top: MediaQuery.of(context).size.height * 0.12,
+                              left: MediaQuery.of(context).size.width * 0.2,
                               child: Image.asset(
                                 'assets/images/green_tick.png',
                                 height: 55,
@@ -323,8 +326,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Positioned(
-                      top: 250,
-                      left: 105,
+                      top: MediaQuery.of(context).size.height * 0.3,
+                      left: MediaQuery.of(context).size.width * 0.3,
                       child: Column(
                         children: [
                           Text(
@@ -348,7 +351,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Positioned(
-                      top: 320,
+                      top: MediaQuery.of(context).size.height * 0.4,
                       child: Padding(
                         padding: EdgeInsets.only(left: 15),
                         child: Column(
@@ -395,32 +398,31 @@ class _HomePageState extends State<HomePage> {
                                     fontSize: 20, color: blueColor),
                               ),
                             ),
-                            Row(
-                              children: [
-                                Container(
-                                  height:
-                                      MediaQuery.of(context).size.width * 0.159,
-                                  child: Text(
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Row(
+                                children: [
+                                  Text(
                                     'Address: ',
                                     style: GoogleFonts.poppins(
                                         fontSize: 20, color: blueColor),
                                   ),
-                                ),
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.7,
-                                  child: Text(
-                                    '${_response_add_1 + " " + "," + " " + _response_add_2}',
-                                    style: GoogleFonts.poppins(
-                                        fontSize: 19, color: blueColor),
-                                  ),
-                                )
-                              ],
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Text(
+                                      '${_response_add_1 + " " + "," + " " + _response_add_2}',
+                                      //maxLines: 1,
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 19, color: blueColor),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(top: 10),
                               child: Text(
-                                'Pincode:$_response_pincode ',
+                                'Pincode: $_response_pincode ',
                                 style: GoogleFonts.poppins(
                                     fontSize: 20, color: blueColor),
                               ),

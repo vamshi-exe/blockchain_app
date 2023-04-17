@@ -35,7 +35,12 @@ class _LoginPageState extends State<LoginPage> {
     if (_formKey.currentState!.validate()) {
       final text = _adhaarNo.text;
       if (text.length == 12) {
-        navigate();
+        _isloading
+            ? CircularProgressIndicator(
+                color: Colors.blue,
+              )
+            : _startLoading();
+        //navigate();
         // Navigate to another page
         // Navigator.push(
         //   context,
@@ -43,6 +48,19 @@ class _LoginPageState extends State<LoginPage> {
         // );
       }
     }
+  }
+
+  bool _isloading = false;
+  void _startLoading() {
+    setState(() {
+      _isloading = true;
+    });
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        _isloading = false;
+      });
+      navigate();
+    });
   }
 
   Future<void> Login(
