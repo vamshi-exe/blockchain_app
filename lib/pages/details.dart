@@ -140,7 +140,7 @@ class _DetailsState extends State<Details> {
     debugPrint("uploaded url == > ${adhaarResponse.secureUrl}");
     debugPrint("uploaded url == > ${userImageRes.secureUrl}");
 
-    var url = Uri.parse('http://192.168.0.103:5000/api/auth/register/');
+    var url = Uri.parse('http://192.168.0.203:5000/api/auth/register/');
     final headers = {'Content-Type': 'application/json'};
 
     var data = {

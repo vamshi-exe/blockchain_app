@@ -41,8 +41,6 @@ class _OTPScreenState extends State<OTPScreen> {
   @override
   void initState() {
     aadhar();
-    print('initstate');
-    print(widget.predata);
     super.initState();
   }
 
@@ -53,26 +51,26 @@ class _OTPScreenState extends State<OTPScreen> {
   Future<void> aadhar() async {
     prefs = await _prefs;
     aadharNum = prefs.getString("aadhar_number")!;
-    //print("The String is ${prefs.getString("aadhar_number")}");
   }
 
   Future<void> verifyOTP(String enteredOtp) async {
-    print(otp.text);
-    print(widget.predata);
-    // var url = Uri.parse('http://192.168.218.11:5000/api/auth/otp/verify');
-    var url = Uri.parse('http://192.168.0.103:5000/api/auth/otp/verify');
-    final headers = {'Content-Type': 'application/json; charset=UTF-8'};
-    var data = {"adhaarNumber": widget.predata, "otp": otp.text};
+    var url = Uri.parse('http://192.168.0.203:5000/api/auth/otp/verify');
+
+    var data = {
+      "adhaarNumber": aadharNum,
+      "otp": otp.text,
+    };
     print(data);
     try {
       var res = await http.post(url,
           headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
+            'Accept': '*/*',
           },
-          body: json.encode(data));
-      print('this is res $res');
+          body: jsonEncode(data));
+      print('this is verifyOTP res ${res.body}');
+      print('verifyOTP ${res.statusCode}');
       if (res.statusCode == 200) {
-        print(res);
+        // print(res);
         final snackbar = SnackBar(content: Text('Verified Successfully!'));
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
         forwardNav();
@@ -93,23 +91,21 @@ class _OTPScreenState extends State<OTPScreen> {
 
   Future<Map<String, dynamic>?> details(String resobj) async {
     try {
-      var url = Uri.parse('http://192.168.0.103:5000/api/auth/user');
-      final headers = {'Content-Type': 'application/json; charset=UTF-8'};
+      var url = Uri.parse('http://192.168.0.203:5000/api/auth/user');
       var postdata = {
         "adhaarNumber": aadharNum,
       };
-      var res = await http.post(url,
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: json.encode(postdata));
-      print('this is data $postdata');
-      print('this is res $res');
+
+      var res = await http.post(
+        url,
+        headers: <String, String>{
+          'Accept': '*/*',
+        },
+        body: jsonEncode(postdata),
+      );
+      // print('this is details data ${res.body}');
+      print('this is details res ${res.statusCode}');
       if (res.statusCode == 200) {
-        //print('this is response object ${json.decode(res.body)}');
-
-        //dynamic ud = json.decode(res.body.toString());
-
         Map<String, dynamic> resobj = jsonDecode(res.body)['user'];
         var fname = jsonDecode(res.body)['user']['firstname'];
         var mname = jsonDecode(res.body)['user']['middlename'];
@@ -188,7 +184,7 @@ class _OTPScreenState extends State<OTPScreen> {
         throw Exception('Failed to verify OTP');
       }
     } catch (err) {
-      print('error was :$err');
+      // print('error was :$err');
     }
     return null;
   }
@@ -322,30 +318,10 @@ class _OTPScreenState extends State<OTPScreen> {
                   ),
                   Center(
                     child: GestureDetector(
-                      // onTap: () => Navigator.of(context).pushReplacement(
-                      //   MaterialPageRoute(
-                      //     builder: (context) => HomePage(),
-                      //   ),
-                      // ),
                       onTap: () {
-                        verifyOTP(otp.text);
-                        details(aadharNum.toString());
-                        // forwardNav();
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     // settings: RouteSettings(arguments: widget.predata),
-                        //     builder: (context) {
-                        //       return HomePage();
-                        //     },
-                        //   ),
-                        // );
+                        forwardNav();
                         // verifyOTP(otp.text);
-                        // Navigator.of(context).pushReplacement(
-                        //   MaterialPageRoute(
-                        //     builder: (context) => const HomePage(),
-                        //   ),
-                        // );
+                        // details(aadharNum.toString());
                       },
                       child: Container(
                           width: 100,
@@ -362,11 +338,6 @@ class _OTPScreenState extends State<OTPScreen> {
                           )),
                     ),
                   ),
-                  // Text(
-                  //   _response.toString(),
-                  //   style:
-                  //       GoogleFonts.poppins(color: Colors.black, fontSize: 21),
-                  // ),
                   Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: Row(

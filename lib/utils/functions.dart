@@ -112,18 +112,13 @@ Future<void> aadhar() async {
 }
 
 Future<void> details(String adhaarNumber) async {
-  var url = Uri.parse('http://192.168.0.103:5000/api/auth/user');
-  final headers = {'Content-Type': 'application/json; charset=UTF-8'};
+  var url = Uri.parse('http://192.168.0.203:5000/api/auth/user');
   var postdata = {
     "adhaarNumber": aadharNum,
   };
 
   try {
-    var res = await http.post(url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: json.encode(postdata));
+    var res = await http.post(url, body: json.encode(postdata));
     print('this is data $postdata');
     print('this is res $res');
     if (res.statusCode == 200) {

@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isloading = true;
     });
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 0), () {
       setState(() {
         _isloading = false;
       });
@@ -68,12 +68,12 @@ class _LoginPageState extends State<LoginPage> {
   ) async {
     var prefs = await _prefs;
     prefs.setString("aadhar_number", adhaarNumber);
-    print(adhaarNumber);
+    // print(adhaarNumber);
     if (adhaarNumber == "") return;
 
     try {
       //http://192.168.0.103:5000
-      var url = Uri.parse('http://192.168.0.103:5000/api/auth/login/');
+      var url = Uri.parse('http://192.168.0.203:5000/api/auth/login/');
       var res = await http.post(url,
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
@@ -82,9 +82,12 @@ class _LoginPageState extends State<LoginPage> {
       if (res.statusCode == 200) {
         final snackbar = SnackBar(content: Text('OTP SENT!'));
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
-        print('Data sent successfully');
+      }
+      if (res.statusCode == 401) {
+        final snackbar = SnackBar(content: Text('OTP Failed!'));
+        ScaffoldMessenger.of(context).showSnackBar(snackbar);
       } else {
-        print(res.statusCode);
+        // print(res.statusCode);
       }
     } catch (err) {
       print(err);
@@ -104,13 +107,11 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: WillPopScope(
-        onWillPop: () async => false,
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          body: loginUI(context),
-        ),
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: loginUI(context),
       ),
     );
   }
@@ -122,7 +123,8 @@ class _LoginPageState extends State<LoginPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 30),
+            padding:
+                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.15),
             child: Center(
               child: Image.asset(
                 "assets/images/login.png",
