@@ -92,7 +92,7 @@ class _HomePageState extends State<HomePage> {
   ///
   Future<Map<String, dynamic>?> details() async {
     try {
-      var url = Uri.parse('http://192.168.0.203:5000/api/auth/user');
+      var url = Uri.parse('http://192.168.0.104:5000/api/auth/user');
 
       var postdata = {
         "adhaarNumber": aadharNum,
@@ -190,7 +190,7 @@ class _HomePageState extends State<HomePage> {
   var _responseText;
 
   // Future makeRequest() async {
-  //   var getUrl = Uri.parse('http://192.168.0.203:5000/api/auth/user');
+  //   var getUrl = Uri.parse('http://192.168.0.104:5000/api/auth/user');
   //   var getResponse = await http.get(getUrl);
   //   setState(() {
   //     _responseText = getResponse.body;

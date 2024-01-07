@@ -22,7 +22,6 @@ class _LoginPageState extends State<LoginPage> {
 
   final _prefs = SharedPreferences.getInstance();
 
-  TextEditingController _adhaarNo = TextEditingController();
   FocusNode myFocusNode = new FocusNode();
 
   @override
@@ -39,7 +38,8 @@ class _LoginPageState extends State<LoginPage> {
             ? CircularProgressIndicator(
                 color: Colors.blue,
               )
-            : _startLoading();
+            // : _startLoading();
+            : navigate();
         //navigate();
         // Navigate to another page
         // Navigator.push(
@@ -73,21 +73,25 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       //http://192.168.0.103:5000
-      var url = Uri.parse('http://192.168.0.203:5000/api/auth/login/');
+      var url = Uri.parse('http://192.168.0.104:5000/api/auth/login/');
       var res = await http.post(url,
-          headers: <String, String>{
+          headers: {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: json.encode({'adhaarNumber': adhaarNumber}));
+      print(adhaarNumber);
       if (res.statusCode == 200) {
+        print(res.statusCode);
         final snackbar = SnackBar(content: Text('OTP SENT!'));
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
+        _submitForm();
       }
       if (res.statusCode == 401) {
+        print(res.statusCode);
         final snackbar = SnackBar(content: Text('OTP Failed!'));
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
       } else {
-        // print(res.statusCode);
+        print(res.statusCode);
       }
     } catch (err) {
       print(err);
@@ -104,6 +108,8 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
+  TextEditingController _adhaarNo = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -197,8 +203,6 @@ class _LoginPageState extends State<LoginPage> {
           Center(
             child: GestureDetector(
               onTap: () {
-                _submitForm();
-                // navigate();
                 Login(_adhaarNo.text);
                 // Navigator.pushNamed(context, '/otp');
               },

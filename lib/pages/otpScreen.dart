@@ -54,7 +54,7 @@ class _OTPScreenState extends State<OTPScreen> {
   }
 
   Future<void> verifyOTP(String enteredOtp) async {
-    var url = Uri.parse('http://192.168.0.203:5000/api/auth/otp/verify');
+    var url = Uri.parse('http://192.168.0.104:5000/api/auth/otp/verify');
 
     var data = {
       "adhaarNumber": aadharNum,
@@ -91,7 +91,7 @@ class _OTPScreenState extends State<OTPScreen> {
 
   Future<Map<String, dynamic>?> details(String resobj) async {
     try {
-      var url = Uri.parse('http://192.168.0.203:5000/api/auth/user');
+      var url = Uri.parse('http://192.168.0.104:5000/api/auth/user');
       var postdata = {
         "adhaarNumber": aadharNum,
       };

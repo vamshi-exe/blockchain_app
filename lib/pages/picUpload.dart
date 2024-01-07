@@ -44,7 +44,7 @@
 
 //   // Future<void> sendImageToServer(File imageFile) async {
 //   //   var req = http.MultipartRequest(
-//   //       'POST', Uri.parse('http://192.168.0.106:5000/api/auth/register'));
+//   //       'POST', Uri.parse('http://192.168.0.104:5000/api/auth/register'));
 
 //   //   var image = await http.MultipartFile.fromPath('image', imageFile.path);
 
