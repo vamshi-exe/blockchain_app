@@ -1,80 +1,133 @@
-// class UserModel {
-//   late String? adhaarNumber;
-//   late String? firstname;
-//   late String? middlename;
-//   late String? lastname;
-//   late String? dob;
-//   late String? address_1;
-//   late String? address_2;
-//   late String? contactNo;
-//   late String? pincode;
-//   late String? state;
-//   late String? user_image;
-//   late bool? isVerified;
+// import 'package:flutter/material.dart';
 
-//   UserModel(
-//       {this.adhaarNumber,
-//       this.firstname,
-//       this.middlename,
-//       this.lastname,
-//       this.dob,
-//       this.address_1,
-//       this.address_2,
-//       this.contactNo,
-//       this.pincode,
-//       this.state,
-//       this.user_image,
-//       this.isVerified});
+// class UserDataProvider extends ChangeNotifier {
+//   UserData? _userData;
 
-//   factory UserModel.fromJson(Map<String, dynamic> json) {
-//     return UserModel(
-//       adhaarNumber: json['adhaarNumber'],
-//       firstname: json['firstname'],
-//       middlename: json['middlename'],
-//       lastname: json['lastname'],
-//       dob: json['dob'],
-//       address_1: json['address_1'],
-//       address_2: json['address_2'],
-//       contactNo: json['contactNo'],
-//       pincode: json['pincode'],
-//       state: json['state'],
-//       user_image: json['user_image'],
-//       isVerified: json['isVerified'],
+//   UserData? get userData => _userData;
+
+//   void setUserData(UserData newData) {
+//     _userData = newData;
+//     notifyListeners();
+//   }
+// }
+
+// class UserData {
+//   UserDataDetails? data;
+//   String? message;
+
+//   UserData({
+//     this.data,
+//     this.message,
+//   });
+
+//   factory UserData.fromJson(Map<String, dynamic> json) {
+//     return UserData(
+//       data: UserDataDetails.fromJson(json['data']),
+//       message: json['message'],
 //     );
 //   }
 // }
 
-import 'dart:convert';
+// class UserDataDetails {
+//   // final String id;
+//   // final String adhaarNumber;
+//   final String firstname;
+//   final String middlename;
+//   final String lastname;
+//   final String dob;
+//   final String address1;
+//   final String address2;
+//   final String contactNo;
+//   final String pincode;
+//   final String state;
+//   final String adhaarImage;
+//   final String userImage;
+//   final bool isVerified;
+//   // final String createdAt;
+//   // final int v;
 
-// final userModel = userModelFromJson(jsonString);
-UserModel userModelFromJson(String str) => UserModel.fromJson(json.decode(str));
+//   UserDataDetails({
+//     // required this.id,
+//     // required this.adhaarNumber,
+//     required this.firstname,
+//     required this.middlename,
+//     required this.lastname,
+//     required this.dob,
+//     required this.address1,
+//     required this.address2,
+//     required this.contactNo,
+//     required this.pincode,
+//     required this.state,
+//     required this.adhaarImage,
+//     required this.userImage,
+//     required this.isVerified,
+//     // required this.createdAt,
+//     // required this.v,
+//   });
 
-String userModelToJson(UserModel data) => json.encode(data.toJson());
+//   factory UserDataDetails.fromJson(Map<String, dynamic>? json) {
+//     if (json == null) {
+//       // Handle the case where json is null
+//       return UserDataDetails(
+//         // id: '',
+//         // adhaarNumber: '',
+//         firstname: '',
+//         middlename: '',
+//         lastname: '',
+//         dob: '',
+//         address1: '',
+//         address2: '',
+//         contactNo: '',
+//         pincode: '',
+//         state: '',
+//         adhaarImage: '',
+//         userImage: '',
+//         isVerified: false,
+//         // createdAt: '',
+//         // v: 0,
+//       );
+//     }
 
-class UserModel {
-  UserModel({
-    required this.status,
-    required this.user,
-  });
+//     return UserDataDetails(
+//       // id: json['_id'] ?? '',
+//       // adhaarNumber: json['adhaarNumber'] ?? '',
+//       firstname: json['firstname'].toString() ?? '',
+//       middlename: json['middlename'].toString() ?? '',
+//       lastname: json['lastname'].toString() ?? '',
+//       dob: json['dob'].toString() ?? '',
+//       address1: json['address_1'].toString() ?? '',
+//       address2: json['address_2'].toString() ?? '',
+//       contactNo: json['contactNo'].toString() ?? '',
+//       pincode: json['pincode'].toString() ?? '',
+//       state: json['state'].toString() ?? '',
+//       adhaarImage: json['adhaar_image'].toString() ?? '',
+//       userImage: json['user_image'].toString() ?? '',
+//       isVerified: json['isVerified'] ?? false,
+//       // createdAt: json['createdAt'] ?? '',
+//       // v: json['__v'] ?? 0,
+//     );
+//   }
+// }
 
-  int status;
-  User user;
+import 'package:flutter/material.dart';
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-        status: json["status"],
-        user: User.fromJson(json["user"]),
-      );
+class UserData {
+  final bool isVerified;
+  final String adhaarNumber;
+  final String firstname;
+  final String middlename;
+  final String lastname;
+  final String dob;
+  final String address1;
+  final String address2;
+  final String contactNo;
+  final String pincode;
+  final String adhaarImage;
+  final String userImage;
 
-  Map<String, dynamic> toJson() => {
-        "status": status,
-        "user": user.toJson(),
-      };
-}
-
-class User {
-  User({
-    this.id,
-    this.adhaarNumber,
+  UserData({
+    required this.isVerified,
+    required this.adhaarNumber,
     required this.firstname,
     required this.middlename,
     required this.lastname,
@@ -83,66 +136,32 @@ class User {
     required this.address2,
     required this.contactNo,
     required this.pincode,
-    required this.state,
     required this.adhaarImage,
     required this.userImage,
-    required this.isVerified,
-    this.createdAt,
-    this.v,
   });
 
-  String? id;
-  String? adhaarNumber;
-  String firstname;
-  String middlename;
-  String lastname;
-  String dob;
-  String address1;
-  String address2;
-  String contactNo;
-  String pincode;
-  String state;
-  String adhaarImage;
-  String userImage;
-  bool isVerified;
-  DateTime? createdAt;
-  int? v;
+  // Add more fields as needed
+}
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json["_id"],
-        adhaarNumber: json["adhaarNumber"],
-        firstname: json["firstname"],
-        middlename: json["middlename"],
-        lastname: json["lastname"],
-        dob: json["dob"],
-        address1: json["address_1"],
-        address2: json["address_2"],
-        contactNo: json["contactNo"],
-        pincode: json["pincode"],
-        state: json["state"],
-        adhaarImage: json["adhaar_image"],
-        userImage: json["user_image"],
-        isVerified: json["isVerified"],
-        createdAt: DateTime.parse(json["createdAt"]),
-        v: json["__v"],
-      );
+class UserProvider with ChangeNotifier {
+  UserData _userData = UserData(
+      firstname: '',
+      middlename: '',
+      lastname: '',
+      isVerified: false,
+      adhaarNumber: '',
+      dob: '',
+      address1: '',
+      address2: '',
+      contactNo: '',
+      pincode: '',
+      adhaarImage: '',
+      userImage: '');
 
-  Map<String, dynamic> toJson() => {
-        "_id": id,
-        "adhaarNumber": adhaarNumber,
-        "firstname": firstname,
-        "middlename": middlename,
-        "lastname": lastname,
-        "dob": dob,
-        "address_1": address1,
-        "address_2": address2,
-        "contactNo": contactNo,
-        "pincode": pincode,
-        "state": state,
-        "adhaar_image": adhaarImage,
-        "user_image": userImage,
-        "isVerified": isVerified,
-        "createdAt": createdAt?.toIso8601String(),
-        "__v": v,
-      };
+  UserData get userData => _userData;
+
+  void setUserData(UserData data) {
+    _userData = data;
+    notifyListeners();
+  }
 }

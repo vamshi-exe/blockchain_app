@@ -26,7 +26,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -40,12 +39,6 @@ class _LoginPageState extends State<LoginPage> {
               )
             // : _startLoading();
             : navigate();
-        //navigate();
-        // Navigate to another page
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const OTPScreen()),
-        // );
       }
     }
   }
@@ -64,38 +57,38 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> Login(
-    String adhaarNumber,
-  ) async {
+      // String adhaarNumber,
+      ) async {
     var prefs = await _prefs;
-    prefs.setString("aadhar_number", adhaarNumber);
+    prefs.setString("aadhar_number", _adhaarNo.text);
     // print(adhaarNumber);
-    if (adhaarNumber == "") return;
+    // if (adhaarNumber == "") return;
 
-    try {
-      //http://192.168.0.103:5000
-      var url = Uri.parse('http://192.168.0.104:5000/api/auth/login/');
-      var res = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: json.encode({'adhaarNumber': adhaarNumber}));
-      print(adhaarNumber);
-      if (res.statusCode == 200) {
-        print(res.statusCode);
-        final snackbar = SnackBar(content: Text('OTP SENT!'));
-        ScaffoldMessenger.of(context).showSnackBar(snackbar);
-        _submitForm();
-      }
-      if (res.statusCode == 401) {
-        print(res.statusCode);
-        final snackbar = SnackBar(content: Text('OTP Failed!'));
-        ScaffoldMessenger.of(context).showSnackBar(snackbar);
-      } else {
-        print(res.statusCode);
-      }
-    } catch (err) {
-      print(err);
+    // try {
+    //http://192.168.0.103:5000
+    var url = Uri.parse('http://192.168.0.106:5000/api/auth/login/');
+    var res = await http.post(url,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: json.encode({'adhaarNumber': _adhaarNo.text}));
+    print(_adhaarNo.text);
+    if (res.statusCode == 200) {
+      print(res.statusCode);
+      final snackbar = SnackBar(content: Text('OTP SENT!'));
+      ScaffoldMessenger.of(context).showSnackBar(snackbar);
+      _submitForm();
     }
+    if (res.statusCode == 401) {
+      print(res.statusCode);
+      final snackbar = SnackBar(content: Text('OTP Failed!'));
+      ScaffoldMessenger.of(context).showSnackBar(snackbar);
+    } else {
+      print(res.statusCode);
+    }
+    // } catch (err) {
+    //   print(err);
+    // }
   }
 
   void navigate() {
@@ -203,7 +196,7 @@ class _LoginPageState extends State<LoginPage> {
           Center(
             child: GestureDetector(
               onTap: () {
-                Login(_adhaarNo.text);
+                Login();
                 // Navigator.pushNamed(context, '/otp');
               },
               child: Container(

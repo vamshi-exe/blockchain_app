@@ -51,7 +51,7 @@ class _DetailsState extends State<Details> {
   //   var stream = http.ByteStream(_image!.openRead());
   //   stream.cast();
   //   var length = await _image!.length();
-  //   var uri = Uri.parse('http://192.168.0.104:5000/api/auth/register');
+  //   var uri = Uri.parse('http://192.168.0.106:5000/api/auth/register');
   //   var req = http.MultipartRequest('POST', uri);
   //   var multipart = http.MultipartFile('_image', stream, length);
   //   req.files.add(multipart);
@@ -140,7 +140,7 @@ class _DetailsState extends State<Details> {
     debugPrint("uploaded url == > ${adhaarResponse.secureUrl}");
     debugPrint("uploaded url == > ${userImageRes.secureUrl}");
 
-    var url = Uri.parse('http://192.168.0.104:5000/api/auth/register/');
+    var url = Uri.parse('http://192.168.0.106:5000/api/auth/register/');
     final headers = {'Content-Type': 'application/json'};
 
     var data = {

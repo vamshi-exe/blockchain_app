@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
+import 'package:blockchain/model/userModel.dart';
 import 'package:blockchain/pages/home.dart';
 import 'package:blockchain/pages/login.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +10,7 @@ import 'package:blockchain/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OTPScreen extends StatefulWidget {
@@ -53,160 +57,224 @@ class _OTPScreenState extends State<OTPScreen> {
     aadharNum = prefs.getString("aadhar_number")!;
   }
 
-  Future<void> verifyOTP(String enteredOtp) async {
-    var url = Uri.parse('http://192.168.0.104:5000/api/auth/otp/verify');
-
+  void fetchData(BuildContext context) async {
     var data = {
       "adhaarNumber": aadharNum,
       "otp": otp.text,
     };
-    print(data);
-    try {
-      var res = await http.post(url,
-          headers: <String, String>{
-            'Accept': '*/*',
-          },
-          body: jsonEncode(data));
-      print('this is verifyOTP res ${res.body}');
-      print('verifyOTP ${res.statusCode}');
-      if (res.statusCode == 200) {
-        // print(res);
-        final snackbar = SnackBar(content: Text('Verified Successfully!'));
-        ScaffoldMessenger.of(context).showSnackBar(snackbar);
-        forwardNav();
-        return jsonDecode(res.body)['success'];
-      } else {
-        final snackbar =
-            SnackBar(content: Text('Verification failed! Try Again'));
-        ScaffoldMessenger.of(context).showSnackBar(snackbar);
-        Text('Error sending data.');
-        throw Exception('Failed to verify OTP');
-      }
-    } catch (err) {
-      print('error was :$err');
+    final response = await http.post(
+      Uri.parse("http://192.168.0.106:5000/api/auth/otp/verify"),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      final userData = UserData(
+        firstname: responseData['data']['firstname'],
+        middlename: responseData['data']['middlename'],
+        lastname: responseData['data']['lastname'],
+        isVerified: responseData['data']['isVerified'],
+        adhaarNumber: responseData['data']['adhaarNumber'],
+        dob: responseData['data']['dob'],
+        address1: responseData['data']['address_1'],
+        address2: responseData['data']['address_2'],
+        contactNo: responseData['data']['contactNo'],
+        pincode: responseData['data']['pincode'],
+        adhaarImage: responseData['data']['adhaar_image'],
+        userImage: responseData['data']['user_image'],
+        // Add more fields as needed
+      );
+
+      context.read<UserProvider>().setUserData(userData);
+      forwardNav();
+      await saveAuthenticationStatus(true);
+    } else {
+      // Handle errors
+      print("Failed to load data. Status code: ${response.statusCode}");
     }
   }
+
+  // Future<void> verifyOTP(String enteredOtp) async {
+  //   var url = Uri.parse('http://192.168.0.106:5000/api/auth/otp/verify');
+
+  // var data = {
+  //   "adhaarNumber": aadharNum,
+  //   "otp": enteredOtp,
+  // };
+  //   print(data);
+  //   try {
+  //     var res = await http.post(
+  //       url,
+  // headers: {
+  //   'Content-Type': 'application/json; charset=UTF-8',
+  // },
+  //       body: jsonEncode(data),
+  //     );
+
+  //     if (res.statusCode == 200) {
+  //       print(res.body);
+
+  //       // Check if the response body is not null
+  //       if (res.body != null && res.body.isNotEmpty) {
+  //         // Extract the "data" field from the response
+  //         Map<String, dynamic> responseMap = json.decode(res.body);
+  //         Map<String, dynamic> userDataMap = responseMap['data'];
+
+  //         // Create an instance of UserData using the response
+  //         UserData userData = UserData.fromJson(userDataMap);
+
+  //         // Access the provider and set the user data
+  //         UserDataProvider userDataProvider =
+  //             Provider.of<UserDataProvider>(context, listen: false);
+  //         userDataProvider.setUserData(userData);
+
+  //         // Forward navigation
+  //         forwardNav();
+  //       } else {
+  //         const snackbar =
+  //             SnackBar(content: Text('Verification failed! Try Again'));
+  //         ScaffoldMessenger.of(context).showSnackBar(snackbar);
+  //         throw Exception('Failed to verify OTP');
+  //       }
+  //     } else {
+  //       const snackbar =
+  //           SnackBar(content: Text('Verification failed! Try Again'));
+  //       ScaffoldMessenger.of(context).showSnackBar(snackbar);
+  //       throw Exception('Failed to verify OTP');
+  //     }
+  //   } catch (err) {
+  //     print('error was :$err');
+  //   }
+  // }
 
   String? resobj;
 
-  Future<Map<String, dynamic>?> details(String resobj) async {
-    try {
-      var url = Uri.parse('http://192.168.0.104:5000/api/auth/user');
-      var postdata = {
-        "adhaarNumber": aadharNum,
-      };
+  // Future<Map<String, dynamic>?> details(String resobj) async {
+  //   try {
+  //     var url = Uri.parse('http://192.168.0.106:5000/api/auth/user');
+  //     var postdata = {
+  //       "adhaarNumber": aadharNum,
+  //     };
 
-      var res = await http.post(
-        url,
-        headers: <String, String>{
-          'Accept': '*/*',
-        },
-        body: jsonEncode(postdata),
-      );
-      // print('this is details data ${res.body}');
-      print('this is details res ${res.statusCode}');
-      if (res.statusCode == 200) {
-        Map<String, dynamic> resobj = jsonDecode(res.body)['user'];
-        var fname = jsonDecode(res.body)['user']['firstname'];
-        var mname = jsonDecode(res.body)['user']['middlename'];
-        var lname = jsonDecode(res.body)['user']['lastname'];
-        var dob = jsonDecode(res.body)['user']['dob'];
-        var add1 = jsonDecode(res.body)['user']['address_1'];
-        var add2 = jsonDecode(res.body)['user']['address_2'];
-        var contact = jsonDecode(res.body)['user']['contactNo'];
-        var state = jsonDecode(res.body)['user']['state'];
-        var verified = jsonDecode(res.body)['user']['isVerified'];
-        var pincode = jsonDecode(res.body)['user']['pincode'];
-        var userimage = jsonDecode(res.body)['user']['user_image'];
-        var adhaarimage = jsonDecode(res.body)['user']['adhaar_image'];
+  //     var res = await http.post(
+  //       url,
+  //       headers: {
+  //         'Content-Type': 'application/json; charset=UTF-8',
+  //       },
+  //       body: jsonEncode(postdata),
+  //     );
+  //     // print('this is details data ${res.body}');
+  //     print('this is details res ${res.statusCode}');
+  //     if (res.statusCode == 200) {
+  //       Map<String, dynamic> resobj = jsonDecode(res.body)['user'];
+  //       var fname = jsonDecode(res.body)['user']['firstname'];
+  //       var mname = jsonDecode(res.body)['user']['middlename'];
+  //       var lname = jsonDecode(res.body)['user']['lastname'];
+  //       var dob = jsonDecode(res.body)['user']['dob'];
+  //       var add1 = jsonDecode(res.body)['user']['address_1'];
+  //       var add2 = jsonDecode(res.body)['user']['address_2'];
+  //       var contact = jsonDecode(res.body)['user']['contactNo'];
+  //       var state = jsonDecode(res.body)['user']['state'];
+  //       var verified = jsonDecode(res.body)['user']['isVerified'];
+  //       var pincode = jsonDecode(res.body)['user']['pincode'];
+  //       var userimage = jsonDecode(res.body)['user']['user_image'];
+  //       var adhaarimage = jsonDecode(res.body)['user']['adhaar_image'];
 
-        print('user ======> $resobj');
-        print('user ======> $fname');
-        print('user ======> $mname');
-        print('user ======> $lname');
-        print('user ======> $dob');
-        print('user ======> $add1');
-        print('user ======> $add2');
-        print('user ======> ${verified.toString()}');
-        print('user ======> $userimage');
-        print('user ======> $adhaarimage');
-        print('user ======> $pincode');
-        print('user ======> $state');
-        print('user ======> $contact');
+  //       print('user ======> $resobj');
+  //       print('user ======> $fname');
+  //       print('user ======> $mname');
+  //       print('user ======> $lname');
+  //       print('user ======> $dob');
+  //       print('user ======> $add1');
+  //       print('user ======> $add2');
+  //       print('user ======> ${verified.toString()}');
+  //       print('user ======> $userimage');
+  //       print('user ======> $adhaarimage');
+  //       print('user ======> $pincode');
+  //       print('user ======> $state');
+  //       print('user ======> $contact');
 
-        setState(() {
-          _response = resobj.toString();
-        });
-        setState(() {
-          _response_Fname = fname;
-        });
-        setState(() {
-          _response_Mname = mname;
-        });
-        setState(() {
-          _response_Lname = lname;
-        });
-        setState(() {
-          _response_contact_no = contact;
-        });
-        setState(() {
-          _response_DOB = dob;
-        });
-        setState(() {
-          _response_state = state;
-        });
-        setState(() {
-          _response_add_1 = add1;
-        });
-        setState(() {
-          _response_add_2 = add2;
-        });
-        setState(() {
-          _response_verified = verified.toString();
-        });
-        setState(() {
-          _response_pincode = pincode;
-        });
-        setState(() {
-          _response_user_image = userimage;
-        });
-        // print('user ======> $resobj');
-        setState(() {
-          _response = resobj.toString();
-        });
-        // print('tis is from setstate ${_responseText.toString()}');
-        dynamic user = res.body;
-        print('${json.decode(user.body)}');
-        print('qwrtyuiop ${user.user}');
+  //       setState(() {
+  //         _response = resobj.toString();
+  //       });
+  //       setState(() {
+  //         _response_Fname = fname;
+  //       });
+  //       setState(() {
+  //         _response_Mname = mname;
+  //       });
+  //       setState(() {
+  //         _response_Lname = lname;
+  //       });
+  //       setState(() {
+  //         _response_contact_no = contact;
+  //       });
+  //       setState(() {
+  //         _response_DOB = dob;
+  //       });
+  //       setState(() {
+  //         _response_state = state;
+  //       });
+  //       setState(() {
+  //         _response_add_1 = add1;
+  //       });
+  //       setState(() {
+  //         _response_add_2 = add2;
+  //       });
+  //       setState(() {
+  //         _response_verified = verified.toString();
+  //       });
+  //       setState(() {
+  //         _response_pincode = pincode;
+  //       });
+  //       setState(() {
+  //         _response_user_image = userimage;
+  //       });
+  //       // print('user ======> $resobj');
+  //       setState(() {
+  //         _response = resobj.toString();
+  //       });
+  //       // print('tis is from setstate ${_responseText.toString()}');
+  //       dynamic user = res.body;
+  //       print('${json.decode(user.body)}');
+  //       print('qwrtyuiop ${user.user}');
 
-        return resobj;
-      } else {
-        throw Exception('Failed to verify OTP');
-      }
-    } catch (err) {
-      // print('error was :$err');
-    }
-    return null;
-  }
+  //       return resobj;
+  //     } else {
+  //       throw Exception('Failed to verify OTP');
+  //     }
+  //   } catch (err) {
+  //     // print('error was :$err');
+  //   }
+  //   return null;
+  // }
 
   void navigate() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => LoginPage(),
+        builder: (context) => const LoginPage(),
       ),
     );
   }
 
   void forwardNav() {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => HomePage(
-          recievedData: _response,
-        ),
+            // recievedData: _response,
+            ),
       ),
     );
+  }
+
+  Future<void> saveAuthenticationStatus(bool isAuthenticated) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isAuthenticated', isAuthenticated);
   }
 
   @override
@@ -219,7 +287,7 @@ class _OTPScreenState extends State<OTPScreen> {
           color: Color.fromARGB(255, 23, 76, 119),
           fontWeight: FontWeight.w500),
       decoration: BoxDecoration(
-        border: Border.all(color: Color.fromARGB(255, 173, 181, 187)),
+        border: Border.all(color: const Color.fromARGB(255, 173, 181, 187)),
         borderRadius: BorderRadius.circular(8),
       ),
     );
@@ -282,7 +350,7 @@ class _OTPScreenState extends State<OTPScreen> {
                     height: 30,
                   ),
                   Padding(
-                    padding: EdgeInsets.only(left: 05),
+                    padding: const EdgeInsets.only(left: 05),
                     child: InkWell(
                       onTap: navigate,
                       //onTap: Navigator.pushNamed(context, '/');,
@@ -299,7 +367,7 @@ class _OTPScreenState extends State<OTPScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   Padding(
@@ -319,8 +387,9 @@ class _OTPScreenState extends State<OTPScreen> {
                   Center(
                     child: GestureDetector(
                       onTap: () {
-                        forwardNav();
+                        // forwardNav();
                         // verifyOTP(otp.text);
+                        fetchData(context);
                         // details(aadharNum.toString());
                       },
                       child: Container(

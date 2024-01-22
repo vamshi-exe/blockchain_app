@@ -112,7 +112,7 @@ Future<void> aadhar() async {
 }
 
 Future<void> details(String adhaarNumber) async {
-  var url = Uri.parse('http://192.168.0.104:5000/api/auth/user');
+  var url = Uri.parse('http://192.168.0.106:5000/api/auth/user');
   var postdata = {
     "adhaarNumber": aadharNum,
   };
