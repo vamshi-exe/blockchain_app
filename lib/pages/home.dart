@@ -334,6 +334,9 @@ class _HomePageState extends State<HomePage> {
                                                       const EdgeInsets.all(20),
                                                   child: const Text('Logout'),
                                                   onPressed: () {
+                                                    prefs.setBool(
+                                                        'isAuthenticated',
+                                                        false);
                                                     Navigator.pushReplacement(
                                                         context,
                                                         MaterialPageRoute(
@@ -385,108 +388,8 @@ class _HomePageState extends State<HomePage> {
               ),
             );
           }
-          // return ;
         },
       ),
-      //////////////////////////////////
-      // body: Column(
-      //   children: [
-      //     ElevatedButton(
-      //       onPressed: () {
-      //         details();
-      //       },
-      //       child: Text('send'),
-      //     ),
-      //     Text(widget.recievedData.toString()),
-      //     Text(
-      //       'this is name${_response_Fname}',
-      //       style: TextStyle(color: Colors.black),
-      //     ),
-      //     SizedBox(
-      //       height: 20,
-      //     ),
-      //     Text(_response)
-      //     // Text(
-      //     //   _response,
-      //     //   style: GoogleFonts.poppins(color: Colors.black, fontSize: 21),
-      //     // ),
-      //     //Text(_responseText!)
-      //   ],
-      // )
-      //ApiCall(response: response),
     );
   }
 }
-
-// class ApiCall extends StatelessWidget {
-//   const ApiCall({
-//     super.key,
-//     required this.response,
-//   });
-
-//   final response;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return FutureBuilder(
-//       future: response,
-//       builder: (BuildContext context, AsyncSnapshot snapshot) {
-//         if (snapshot.hasData) {
-//           return ListView.builder(
-//               itemBuilder: (BuildContext context, int index) {
-//             return Card(
-//               child: Column(children: [
-//                 ListTile(
-//                   title: Text(snapshot.data[index]['firstname']),
-//                 )
-//               ]),
-//             );
-//           });
-//         } else {
-//           return Center(
-//             child: CircularProgressIndicator(),
-//           );
-//         }
-//       },
-//     );
-//   }
-// }
-
-// import 'package:blockchain/model/userModel.dart';
-// import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
-
-// class HomePage extends StatefulWidget {
-//   @override
-//   State<HomePage> createState() => _HomePageState();
-// }
-
-// class _HomePageState extends State<HomePage> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('User Data'),
-//       ),
-//       body: Center(
-//         child: Consumer<UserProvider>(
-//           builder: (context, userProvider, child) {
-//             final userData = userProvider.userData;
-//             return userData.firstName.isEmpty
-//                 ? CircularProgressIndicator()
-//                 : Column(
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Text('First Name: ${userData.firstName}'),
-//                       Text('Middle Name: ${userData.middleName}'),
-//                       Text('Last Name: ${userData.lastName}'),
-//                       // Add more fields as needed
-//                     ],
-//                   );
-//           },
-//         ),
-//       ),
-//     );
-//   }
-// }
