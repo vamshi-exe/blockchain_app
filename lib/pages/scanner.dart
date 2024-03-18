@@ -1,18 +1,19 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
+import 'package:blockchain/utils/urllist.dart';
 import 'package:http/http.dart' as http;
-import 'package:blockchain/pages/home.dart';
 import 'package:blockchain/utils/colors.dart';
-import 'package:blockchain/utils/functions.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class QRViewExample extends StatefulWidget {
-  QRViewExample({
+  final String adhaarNumber;
+  const QRViewExample({
     super.key,
+    required this.adhaarNumber,
   });
   @override
   State<StatefulWidget> createState() => _QRViewExampleState();
@@ -25,27 +26,18 @@ class _QRViewExampleState extends State<QRViewExample> {
 
   late SharedPreferences prefs;
   String? aadharNum;
-  final _prefs = SharedPreferences.getInstance();
 
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   @override
   void initState() {
-    print('this one is from init state $aadharNum');
-    // TODO: implement initState
     super.initState();
-    aadhar();
-    // print('this isssssss ${prefs.getString("aadhar_number")}');
-  }
-
-  Future<void> aadhar() async {
-    prefs = await _prefs;
-    aadharNum = prefs.getString("aadhar_number")!;
-    // print("The String is ${prefs.getString("aadhar_number")}");
+    setState(() {
+      aadharNum = widget.adhaarNumber;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    Object? predata = ModalRoute.of(context)!.settings.arguments;
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -57,7 +49,7 @@ class _QRViewExampleState extends State<QRViewExample> {
               children: <Widget>[
                 if (result != null)
                   Text(
-                    'Data: ${result!.code} ,${aadharNum}',
+                    'Data: ${result!.code} ,$aadharNum',
                   )
                 // Navigator.pushNamed(context, '/otp');
                 else
@@ -102,20 +94,20 @@ class _QRViewExampleState extends State<QRViewExample> {
 
       /// function for sending scanned data
       Future<void> scanningFun() async {
-        //print(otp.text);
-
-        // var url = Uri.parse('http://192.168.218.11:5000/api/auth/otp/verify');
-        var url = Uri.parse('http://192.168.0.106:5000/api/verify-scan');
-        var data = {"adhaarNumber": aadharNum, "code": scanData.code};
+        var url = Uri.parse('${Urllist.base_url}api/verify-scan');
+        var data = {"id": scanData.code, "adhaarnumber": aadharNum};
+        print(json.encode(data));
         print('this adhaar is from function $aadharNum');
         try {
           var res = await http.post(url,
-              headers: <String, String>{
+              headers: {
                 'Content-Type': 'application/json; charset=UTF-8',
               },
               body: json.encode(data));
           if (res.statusCode == 200) {
-            final snackbar = SnackBar(content: Text('Scanned Successfully!'));
+            print(res.body);
+            final snackbar =
+                const SnackBar(content: Text('Scanned Successfully!'));
             ScaffoldMessenger.of(context).showSnackBar(snackbar);
             // Navigator.push(
             //   context,
@@ -131,9 +123,9 @@ class _QRViewExampleState extends State<QRViewExample> {
             return jsonDecode(res.body)['success'];
           } else {
             final snackbar =
-                SnackBar(content: Text('Verification failed! Try Again'));
+                const SnackBar(content: Text('Verification failed! Try Again'));
             ScaffoldMessenger.of(context).showSnackBar(snackbar);
-            Text('Error sending data.');
+            const Text('Error sending data.');
             throw Exception('Failed to verify OTP');
           }
         } catch (err) {

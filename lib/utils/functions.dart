@@ -3,6 +3,7 @@ import 'dart:core';
 import 'dart:core';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:blockchain/utils/urllist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -112,7 +113,7 @@ Future<void> aadhar() async {
 }
 
 Future<void> details(String adhaarNumber) async {
-  var url = Uri.parse('http://192.168.0.106:5000/api/auth/user');
+  var url = Uri.parse('${Urllist.base_url}api/auth/user');
   var postdata = {
     "adhaarNumber": aadharNum,
   };

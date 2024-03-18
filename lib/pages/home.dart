@@ -1,13 +1,10 @@
+// ignore_for_file: must_be_immutable, non_constant_identifier_names
+
 import 'dart:convert';
-import 'dart:developer';
-import 'package:blockchain/controllers/helper.dart';
 import 'package:blockchain/model/userModel.dart';
-import 'package:blockchain/pages/details.dart';
 import 'package:blockchain/pages/scanner.dart';
-import 'package:flutter/gestures.dart';
+import 'package:blockchain/utils/urllist.dart';
 import 'package:glassmorphism/glassmorphism.dart';
-import 'package:provider/provider.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'package:blockchain/pages/login.dart';
 import 'package:blockchain/utils/colors.dart';
@@ -66,48 +63,27 @@ class _HomePageState extends State<HomePage> {
     aadharNum = prefs.getString("aadhar_number")!;
   }
 
-  Future<void> details() async {
-    aadhar();
-    try {
-      var url = Uri.parse(
-          'http://192.168.0.106:5000/api/auth/getData?adhaarNumber=$aadharNum');
-      var res = await http.get(
-        url,
-      );
+  Future<UserData> details() async {
+    await aadhar();
+    var url = Uri.parse(
+        '${Urllist.base_url}api/auth/getData?adhaarNumber=$aadharNum');
+    var res = await http.get(
+      url,
+    );
 
-      if (res.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(res.body);
-        final userData = UserData(
-          firstname: responseData['firstname'],
-          middlename: responseData['middlename'],
-          lastname: responseData['lastname'],
-          isVerified: responseData['isVerified'],
-          adhaarNumber: responseData['adhaarNumber'],
-          dob: responseData['dob'],
-          address1: responseData['address_1'],
-          address2: responseData['address_2'],
-          contactNo: responseData['contactNo'],
-          pincode: responseData['pincode'],
-          adhaarImage: responseData['adhaar_image'],
-          userImage: responseData['user_image'],
-        );
-
-        context.read<UserProvider>().setUserData(userData);
-        final user = res.body;
-        print('${json.decode(user)}');
-      } else {
-        print(res.statusCode);
-        print(res.body);
-        throw Exception('Failed to fetch data');
-      }
-    } catch (err) {
-      print('error was :$err');
+    if (res.statusCode == 200) {
+      print(res.body);
+      return UserData.fromJson(jsonDecode(res.body));
+    } else {
+      print(res.statusCode);
+      print(res.body);
+      throw Exception('Failed to fetch data');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final userData = Provider.of<UserProvider>(context, listen: false).userData;
+    // final userData = Provider.of<UserProvider>(context, listen: false).userData;
 
     return Scaffold(
       extendBodyBehindAppBar: false,
@@ -115,10 +91,11 @@ class _HomePageState extends State<HomePage> {
         future: details(),
         builder: (BuildContext context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Text('${snapshot.error}');
           } else {
+            final userData = snapshot.data;
             return SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
               child: Column(
@@ -141,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                                 const Color(0xFFffffff).withAlpha(0),
                                 const Color(0xFFffffff).withAlpha(0),
                               ],
-                              stops: [
+                              stops: const [
                                 0.3,
                                 1,
                               ]),
@@ -155,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                                 const Color(0x0fffffff).withAlpha(55),
                                 const Color(0xFFF75035).withAlpha(10),
                               ],
-                              stops: [
+                              stops: const [
                                 0.06,
                                 0.95,
                                 1
@@ -166,7 +143,9 @@ class _HomePageState extends State<HomePage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => QRViewExample(),
+                                    builder: (context) => QRViewExample(
+                                      adhaarNumber: aadharNum!,
+                                    ),
                                   ),
                                 );
                               },
@@ -203,18 +182,19 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               CircleAvatar(
                                   radius: 75,
-                                  backgroundImage:
-                                      // NetworkImage('$_response_user_image'),
-                                      Image.network(userData.userImage).image),
+                                  backgroundImage: Image.network(
+                                    userData!.userImage,
+                                  ).image),
                               Positioned(
                                 top: 107,
-                                // MediaQuery.of(context).size.height * 0.115,
                                 left: 90,
-                                // MediaQuery.of(context).size.width * 0.21,
-                                child: Image.asset(
-                                  'assets/images/green_tick.png',
-                                  height: 55,
-                                  width: 55,
+                                child: Visibility(
+                                  visible: userData.isVerified,
+                                  child: Image.asset(
+                                    'assets/images/green_tick.png',
+                                    height: 55,
+                                    width: 55,
+                                  ),
                                 ),
                               )
                             ],
@@ -226,19 +206,26 @@ class _HomePageState extends State<HomePage> {
                         left: MediaQuery.of(context).size.width * 0.3,
                         child: Column(
                           children: [
-                            // Text(
-                            //   '${userData.isVerified}',
-                            //   style: GoogleFonts.poppins(
-                            //       fontSize: 18, color: Colors.green),
-                            // ),
+                            Visibility(
+                              visible: !userData.isVerified,
+                              child: const Row(
+                                children: [
+                                  Text('Verification Pending'),
+                                  Icon(
+                                    Icons.warning,
+                                    color: Colors.amber,
+                                  )
+                                ],
+                              ),
+                            ),
                             Row(
                               children: [
                                 Image.asset('assets/images/location.png',
                                     width: 35, height: 35),
                                 Text(
-                                  'Maharashtra',
-                                  style:
-                                      TextStyle(fontSize: 19, color: blueColor),
+                                  userData.state,
+                                  style: const TextStyle(
+                                      fontSize: 19, color: blueColor),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
@@ -249,14 +236,14 @@ class _HomePageState extends State<HomePage> {
                       Positioned(
                         top: MediaQuery.of(context).size.height * 0.4,
                         child: Padding(
-                          padding: EdgeInsets.only(left: 15),
+                          padding: const EdgeInsets.only(left: 15),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
                                   Text(
-                                    'Name: ${userData.firstname + " " + userData.lastname} ',
+                                    'Name: ${"${userData.firstname} ${userData.lastname}"} ',
                                     style: GoogleFonts.poppins(
                                         fontSize: 20, color: blueColor),
                                   ),
@@ -265,7 +252,7 @@ class _HomePageState extends State<HomePage> {
                               Padding(
                                 padding: const EdgeInsets.only(top: 10),
                                 child: Text(
-                                  'Middle Name: ${userData.middlename + " " + userData.lastname}  ',
+                                  'Middle Name: ${"${userData.middlename} ${userData.lastname}"}  ',
                                   style: GoogleFonts.poppins(
                                       fontSize: 20, color: blueColor),
                                 ),
@@ -306,7 +293,7 @@ class _HomePageState extends State<HomePage> {
                                     SingleChildScrollView(
                                       scrollDirection: Axis.horizontal,
                                       child: Text(
-                                        '${userData.address1 + " " + "," + " " + userData.address2}',
+                                        "${userData.address1} , ${userData.address2}",
                                         //maxLines: 1,
                                         style: GoogleFonts.poppins(
                                             fontSize: 19, color: blueColor),
@@ -376,10 +363,10 @@ class _HomePageState extends State<HomePage> {
                                               fontSize: 21,
                                               color: Colors.white),
                                         ),
-                                        SizedBox(
+                                        const SizedBox(
                                           width: 15,
                                         ),
-                                        Icon(
+                                        const Icon(
                                           Icons.logout,
                                           color: Colors.white,
                                         ),

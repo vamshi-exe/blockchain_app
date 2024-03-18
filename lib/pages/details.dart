@@ -1,18 +1,20 @@
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:blockchain/pages/login.dart';
 import 'package:blockchain/utils/colors.dart';
-import 'package:blockchain/utils/utils.dart';
+import 'package:blockchain/utils/urllist.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:csc_picker/csc_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import '../utils/functions.dart';
 
 class Details extends StatefulWidget {
   const Details({super.key});
@@ -51,7 +53,7 @@ class _DetailsState extends State<Details> {
   //   var stream = http.ByteStream(_image!.openRead());
   //   stream.cast();
   //   var length = await _image!.length();
-  //   var uri = Uri.parse('http://192.168.0.106:5000/api/auth/register');
+  //   var uri = Uri.parse('$Urllist.base_urlapi/auth/register');
   //   var req = http.MultipartRequest('POST', uri);
   //   var multipart = http.MultipartFile('_image', stream, length);
   //   req.files.add(multipart);
@@ -90,20 +92,6 @@ class _DetailsState extends State<Details> {
   final TextEditingController addline2 = TextEditingController();
   final TextEditingController pincode = TextEditingController();
   bool _isLoading = false;
-  //@override
-  // void dispose() {
-  //   // TODO: implement dispose
-  //   super.dispose();
-  //   adhaarNo.dispose();
-  //   phoneNo.dispose();
-  //   name.dispose();
-  //   middlename.dispose();
-  //   lastname.dispose();
-  //   date.dispose();
-  //   addline1.dispose();
-  //   addline2.dispose();
-  //   pincode.dispose();
-  // }
 
   final cloudinary = CloudinaryPublic('drcymcfus', 'my-uploads', cache: false);
 
@@ -140,8 +128,7 @@ class _DetailsState extends State<Details> {
     debugPrint("uploaded url == > ${adhaarResponse.secureUrl}");
     debugPrint("uploaded url == > ${userImageRes.secureUrl}");
 
-    var url = Uri.parse('http://192.168.0.106:5000/api/auth/register/');
-    final headers = {'Content-Type': 'application/json'};
+    var url = Uri.parse('${Urllist.base_url}api/auth/register/');
 
     var data = {
       "adhaarNumber": adhaarNo,
@@ -158,7 +145,9 @@ class _DetailsState extends State<Details> {
       'userImage': userImageRes.secureUrl,
     };
 
-    print(data);
+    if (kDebugMode) {
+      print(data);
+    }
     setState(() {
       _isLoading = false;
     });
@@ -169,12 +158,14 @@ class _DetailsState extends State<Details> {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: json.encode(data));
-      print(res);
+      if (kDebugMode) {
+        print(res);
+      }
       // setState(() {
 
       // });
       if (res.statusCode == 200) {
-        final snackbar = SnackBar(content: Text('Upload successful!'));
+        const snackbar = SnackBar(content: Text('Upload successful!'));
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
         Navigator.push(
           context,
@@ -182,17 +173,23 @@ class _DetailsState extends State<Details> {
             builder: (context) => const LoginPage(),
           ),
         );
-        print('Data sent successfully!');
+        if (kDebugMode) {
+          print('Data sent successfully!');
+        }
       } else {
-        final snackbar = SnackBar(content: Text('Upload failed! Try Again'));
+        const snackbar = SnackBar(content: Text('Upload failed! Try Again'));
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
-        Text('Error sending data.');
-        print('Error sending data.');
+        const Text('Error sending data.');
+        if (kDebugMode) {
+          print('Error sending data.');
+        }
       }
     } catch (err) {
-      final snackbar = SnackBar(content: Text('Upload failed!Try Again'));
+      const snackbar = SnackBar(content: Text('Upload failed!Try Again'));
       ScaffoldMessenger.of(context).showSnackBar(snackbar);
-      print('error was :$err');
+      if (kDebugMode) {
+        print('error was :$err');
+      }
     }
   }
 
@@ -604,106 +601,40 @@ class _DetailsState extends State<Details> {
                     ),
                   ),
                 ),
-                Container(
-                  child: Center(
-                    child: Column(
-                      children: [
-                        // const Text(
-                        //   'Enter your existing Adhaar Info',
-                        //   style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600),
-                        // ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            _pickedAdhaarFile != null
-                                ? Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 45),
-                                        child: Container(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.20,
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.65,
-                                          child: Image.file(File(
-                                            _pickedAdhaarFile!.path,
-                                          )
-
-                                              //fit: BoxFit.,
-                                              ),
-                                        ),
-                                      ),
-                                      TextButton(
-                                          onPressed: () => _pickImage(),
-                                          child: const Text(
-                                            'Retake',
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                color: Color.fromARGB(
-                                                    255, 11, 65, 109)),
-                                          ))
-                                    ],
-                                  )
-                                : Padding(
-                                    padding: const EdgeInsets.only(top: 45),
-                                    child: Container(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.20,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.6,
-                                      decoration: BoxDecoration(
-                                          image: const DecorationImage(
-                                            image: NetworkImage(
-                                                'https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Aadhaar_Logo.svg/375px-Aadhaar_Logo.svg.png'),
-                                          ),
-                                          border: Border.all(
-                                              width: 2,
-                                              color: const Color.fromARGB(
-                                                  255, 23, 76, 119)),
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                      child: IconButton(
-                                          onPressed: () => _pickAdhaarImage(),
-                                          icon: const Icon(
-                                            Icons.upload,
-                                            size: 50,
-                                          )),
-                                    ),
-                                  ),
-                            const Text('Upload your Adhaar Card')
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 35,
-                        ),
-                        Column(
-                          children: [
-                            _pickedFile != null
-                                ? Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Container(
+                Center(
+                  child: Column(
+                    children: [
+                      // const Text(
+                      //   'Enter your existing Adhaar Info',
+                      //   style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600),
+                      // ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          _pickedAdhaarFile != null
+                              ? Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 45),
+                                      child: SizedBox(
                                         height:
                                             MediaQuery.of(context).size.height *
                                                 0.20,
                                         width:
                                             MediaQuery.of(context).size.width *
                                                 0.65,
-                                        child:
-                                            Image.file(File(_pickedFile!.path)),
+                                        child: Image.file(File(
+                                          _pickedAdhaarFile!.path,
+                                        )
+
+                                            //fit: BoxFit.,
+                                            ),
                                       ),
-                                      TextButton(
+                                    ),
+                                    TextButton(
                                         onPressed: () => _pickImage(),
                                         child: const Text(
                                           'Retake',
@@ -711,21 +642,21 @@ class _DetailsState extends State<Details> {
                                               fontSize: 20,
                                               color: Color.fromARGB(
                                                   255, 11, 65, 109)),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : Container(
+                                        ))
+                                  ],
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.only(top: 45),
+                                  child: Container(
                                     height: MediaQuery.of(context).size.height *
                                         0.20,
                                     width:
                                         MediaQuery.of(context).size.width * 0.6,
                                     decoration: BoxDecoration(
                                         image: const DecorationImage(
-                                            image: NetworkImage(
-                                              'https://t4.ftcdn.net/jpg/00/64/67/63/360_F_64676383_LdbmhiNM6Ypzb3FM4PPuFP9rHe7ri8Ju.jpg',
-                                            ),
-                                            fit: BoxFit.cover),
+                                          image: NetworkImage(
+                                              'https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Aadhaar_Logo.svg/375px-Aadhaar_Logo.svg.png'),
+                                        ),
                                         border: Border.all(
                                             width: 2,
                                             color: const Color.fromARGB(
@@ -733,21 +664,78 @@ class _DetailsState extends State<Details> {
                                         borderRadius:
                                             BorderRadius.circular(15)),
                                     child: IconButton(
+                                        onPressed: () => _pickAdhaarImage(),
+                                        icon: const Icon(
+                                          Icons.upload,
+                                          size: 50,
+                                        )),
+                                  ),
+                                ),
+                          const Text('Upload your Adhaar Card')
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 35,
+                      ),
+                      Column(
+                        children: [
+                          _pickedFile != null
+                              ? Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.20,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.65,
+                                      child:
+                                          Image.file(File(_pickedFile!.path)),
+                                    ),
+                                    TextButton(
                                       onPressed: () => _pickImage(),
-                                      icon: const Icon(
-                                        Icons.upload,
-                                        size: 50,
+                                      child: const Text(
+                                        'Retake',
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            color: Color.fromARGB(
+                                                255, 11, 65, 109)),
                                       ),
                                     ),
+                                  ],
+                                )
+                              : Container(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.20,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.6,
+                                  decoration: BoxDecoration(
+                                      image: const DecorationImage(
+                                          image: NetworkImage(
+                                            'https://t4.ftcdn.net/jpg/00/64/67/63/360_F_64676383_LdbmhiNM6Ypzb3FM4PPuFP9rHe7ri8Ju.jpg',
+                                          ),
+                                          fit: BoxFit.cover),
+                                      border: Border.all(
+                                          width: 2,
+                                          color: const Color.fromARGB(
+                                              255, 23, 76, 119)),
+                                      borderRadius: BorderRadius.circular(15)),
+                                  child: IconButton(
+                                    onPressed: () => _pickImage(),
+                                    icon: const Icon(
+                                      Icons.upload,
+                                      size: 50,
+                                    ),
                                   ),
-                            const Text('Upload your Photo')
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                      ],
-                    ),
+                                ),
+                          const Text('Upload your Photo')
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                    ],
                   ),
                 ),
                 Center(
@@ -786,7 +774,7 @@ class _DetailsState extends State<Details> {
                           color: blueColor),
                       child: Center(
                           child: _isLoading
-                              ? Center(
+                              ? const Center(
                                   child: CircularProgressIndicator(
                                     color: Colors.blue,
                                   ),

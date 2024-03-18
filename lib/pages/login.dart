@@ -1,9 +1,10 @@
+// ignore_for_file: non_constant_identifier_names, use_build_context_synchronously
+
 import 'dart:convert';
-import 'package:blockchain/pages/scanner.dart';
+import 'package:blockchain/utils/urllist.dart';
 import 'package:http/http.dart' as http;
 import 'package:blockchain/pages/otpScreen.dart';
 import 'package:blockchain/utils/colors.dart';
-import 'package:blockchain/utils/functions.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,11 +19,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final _prefs = SharedPreferences.getInstance();
 
-  FocusNode myFocusNode = new FocusNode();
+  FocusNode myFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -34,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
       final text = _adhaarNo.text;
       if (text.length == 12) {
         _isloading
-            ? CircularProgressIndicator(
+            ? const CircularProgressIndicator(
                 color: Colors.blue,
               )
             // : _startLoading();
@@ -43,18 +44,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  bool _isloading = false;
-  void _startLoading() {
-    setState(() {
-      _isloading = true;
-    });
-    Future.delayed(Duration(seconds: 0), () {
-      setState(() {
-        _isloading = false;
-      });
-      navigate();
-    });
-  }
+  final bool _isloading = false;
 
   Future<void> Login(
       // String adhaarNumber,
@@ -65,8 +55,7 @@ class _LoginPageState extends State<LoginPage> {
     // if (adhaarNumber == "") return;
 
     // try {
-    //http://192.168.0.103:5000
-    var url = Uri.parse('http://192.168.0.106:5000/api/auth/login/');
+    var url = Uri.parse('${Urllist.base_url}api/auth/login/');
     var res = await http.post(url,
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
@@ -75,13 +64,13 @@ class _LoginPageState extends State<LoginPage> {
     print(_adhaarNo.text);
     if (res.statusCode == 200) {
       print(res.statusCode);
-      final snackbar = SnackBar(content: Text('OTP SENT!'));
+      const snackbar = SnackBar(content: Text('OTP SENT!'));
       ScaffoldMessenger.of(context).showSnackBar(snackbar);
       _submitForm();
     }
     if (res.statusCode == 401) {
       print(res.statusCode);
-      final snackbar = SnackBar(content: Text('OTP Failed!'));
+      const snackbar = SnackBar(content: Text('OTP Failed!'));
       ScaffoldMessenger.of(context).showSnackBar(snackbar);
     } else {
       print(res.statusCode);
@@ -102,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  TextEditingController _adhaarNo = TextEditingController();
+  final TextEditingController _adhaarNo = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +230,7 @@ class _LoginPageState extends State<LoginPage> {
                   style: const TextStyle(
                       color: Color.fromARGB(176, 23, 76, 119), fontSize: 14),
                   children: [
-                    TextSpan(text: "Don't have an account? "),
+                    const TextSpan(text: "Don't have an account? "),
                     TextSpan(
                         text: "SignUp!",
                         style: const TextStyle(
