@@ -49,7 +49,7 @@ class _OTPScreenState extends State<OTPScreen> {
       "otp": otp.text,
     };
     final response = await http.post(
-      Uri.parse("${Urllist}api/auth/otp/verify"),
+      Uri.parse("${Urllist.base_url}api/auth/otp/verify"),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
